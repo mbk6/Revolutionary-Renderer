@@ -3,6 +3,7 @@
 #include "ofMain.h"
 
 #include <vector>
+#include <sstream>
 
 class Renderer : public ofBaseApp {
 
@@ -14,8 +15,13 @@ private:
 
 	// Camera parameters
 	ofVec3f cam_pos = ofVec3f(0, 0, 5);
+	double cam_speed = 0.02;
 	int field_of_view = 600;
 
+	// Controls
+
+	//						   w      s      a      d    space  shift
+	bool pressed_keys[6] = { false, false, false, false, false, false };
 
 	//Verticies of a 2x2 cube centered at (0,0,0)
 	ofVec3f cube_verts[8] = {
