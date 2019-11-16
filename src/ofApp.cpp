@@ -11,6 +11,10 @@ ofVec2f Renderer::transform(ofVec3f point3d) {
 	float y = point3d.y - cam_pos.y;
 	float z = point3d.z - cam_pos.z;
 
+	//Rotate x and z by cam_rot[0], then rotate y and z by cam_rot[1]
+	rotateCoords(x, z, cam_rot[0]);
+	rotateCoords(y, z, cam_rot[1]);
+
 	//Compute perspective scaling value and scale x and y
 	z = field_of_view / z;
 	x *= z;
@@ -18,6 +22,12 @@ ofVec2f Renderer::transform(ofVec3f point3d) {
 
 	//Adjust point with respect to the screen center. subtract from x-center and add to y-center to maintain proper coordinate system
 	return ofVec2f(win_center.x - x, win_center.y + y);
+}
+
+void Renderer::rotateCoords(float& coord1, float& coord2, float& angle) {
+	float temp = coord1;
+	coord1 = temp * std::cos(angle) + coord2 * std::sin(angle);
+	coord2 = coord2 * std::cos(angle) - temp * std::sin(angle);
 }
 
 
@@ -38,22 +48,34 @@ void Renderer::update(){
 	
 	//Update camera position based on held keys
 	if (pressed_keys[0]) {
-		cam_pos.z -= cam_speed;
+		cam_pos.z -= move_speed;
 	}
 	if (pressed_keys[1]) {
-		cam_pos.z += cam_speed;
+		cam_pos.z += move_speed;
 	}
 	if (pressed_keys[2]) {
-		cam_pos.x -= cam_speed;
+		cam_pos.x -= move_speed;
 	}
 	if (pressed_keys[3]) {
-		cam_pos.x += cam_speed;
+		cam_pos.x += move_speed;
 	}
 	if (pressed_keys[4]) {
-		cam_pos.y += cam_speed;
+		cam_pos.y += move_speed;
 	}
 	if (pressed_keys[5]) {
-		cam_pos.y -= cam_speed;
+		cam_pos.y -= move_speed;
+	}
+	if (pressed_keys[6]) {
+		cam_rot.y += turn_speed;
+	}
+	if (pressed_keys[7]) {
+		cam_rot.y -= turn_speed;
+	}
+	if (pressed_keys[8]) {
+		cam_rot.x -= turn_speed;
+	}
+	if (pressed_keys[9]) {
+		cam_rot.x += turn_speed;
 	}
 
 
@@ -69,6 +91,10 @@ void Renderer::draw(){
 	std::stringstream string_stream;
 	string_stream << "cam_pos: (" << cam_pos.x<<", "<<cam_pos.y<<", "<<cam_pos.z<<")";
 	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 10));
+	string_stream.str("");
+	string_stream << "cam_rot: (" << cam_rot.x << ", " << cam_rot.y << ")";
+	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 20));
+	string_stream.str("");
 }
 
 //--------------------------------------------------------------
@@ -94,6 +120,18 @@ void Renderer::keyPressed(int key){
 	}
 	if (key == OF_KEY_SHIFT) {
 		pressed_keys[5] = true;
+	}
+	if (key == OF_KEY_UP) {
+		pressed_keys[6] = true;
+	}
+	if (key == OF_KEY_DOWN) {
+		pressed_keys[7] = true;
+	}
+	if (key == OF_KEY_LEFT) {
+		pressed_keys[8] = true;
+	}
+	if (key == OF_KEY_RIGHT) {
+		pressed_keys[9] = true;
 	}
 
 }
@@ -121,6 +159,18 @@ void Renderer::keyReleased(int key){
 	}
 	if (key == OF_KEY_SHIFT) {
 		pressed_keys[5] = false;
+	}
+	if (key == OF_KEY_UP) {
+		pressed_keys[6] = false;
+	}
+	if (key == OF_KEY_DOWN) {
+		pressed_keys[7] = false;
+	}
+	if (key == OF_KEY_LEFT) {
+		pressed_keys[8] = false;
+	}
+	if (key == OF_KEY_RIGHT) {
+		pressed_keys[9] = false;
 	}
 }
 
