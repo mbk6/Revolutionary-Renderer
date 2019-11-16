@@ -6,15 +6,13 @@ ofVec2f Renderer::transform(ofVec3f point3d) {
 	// 3d transformation equations from https://www.scratchapixel.com/lessons/3d-basic-rendering/computing-pixel-coordinates-of-3d-point
 	// and https://www.youtube.com/watch?v=g4E9iq0BixA
 
-	double x = point3d.x;
-	double y = point3d.y;
-	double z = point3d.z;
-
-	//Offset z value to make point visible
-	z -= 5;
+	//Recenter points based on camera position
+	double x = point3d.x - cam_pos.x;
+	double y = point3d.y - cam_pos.y;
+	double z = point3d.z - cam_pos.z;
 
 	//Compute perspective scaling value and scale x and y
-	z = 500 / z;
+	z = field_of_view / z;
 	x *= z;
 	y *= z;
 
@@ -48,6 +46,27 @@ void Renderer::draw(){
 
 //--------------------------------------------------------------
 void Renderer::keyPressed(int key){
+
+	key = tolower(key);
+
+	if (key == 'w') {
+		cam_pos.z -= 0.5;
+	}
+	if (key == 's') {
+		cam_pos.z += 0.5;
+	}
+	if (key == 'a') {
+		cam_pos.x += 0.5;
+	}
+	if (key == 'd') {
+		cam_pos.x -= 0.5;
+	}
+	if (key == ' ') {
+		cam_pos.y += 0.5;
+	}
+	if (key == OF_KEY_SHIFT) {
+		cam_pos.y -= 0.5;
+	}
 
 }
 

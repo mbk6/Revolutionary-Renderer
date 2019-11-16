@@ -12,6 +12,10 @@ private:
 	int win_height;
 	ofVec2f win_center;
 
+	// Camera parameters
+	ofVec3f cam_pos = ofVec3f(0, 0, 5);
+	int field_of_view = 600;
+
 
 	//Verticies of a 2x2 cube centered at (0,0,0)
 	ofVec3f cube_verts[8] = {
