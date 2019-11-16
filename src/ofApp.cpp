@@ -1,13 +1,37 @@
 #include "ofApp.h"
 
+
+
+ofVec2f Renderer::transform(ofVec3f point3d) {
+	// 3d transformation equations from https://www.scratchapixel.com/lessons/3d-basic-rendering/computing-pixel-coordinates-of-3d-point
+	// and https://www.youtube.com/watch?v=g4E9iq0BixA
+
+	double x = point3d.x;
+	double y = point3d.y;
+	double z = point3d.z;
+
+	//Offset z value to make point visible
+	z -= 5;
+
+	//Compute perspective scaling value and scale x and y
+	z = 500 / z;
+	x *= z;
+	y *= z;
+
+	return ofVec2f(win_center.x + x, win_center.y + y);
+}
+
+
+
 Renderer::Renderer(int width, int height) {
 	win_width = width;
     win_height = height;
+	win_center = ofVec2f(win_width / 2, win_height / 2);
 }
 
 //--------------------------------------------------------------
 void Renderer::setup(){
-
+		ofSetBackgroundColor(ofColor::black);
 }
 
 //--------------------------------------------------------------
@@ -17,9 +41,9 @@ void Renderer::update(){
 
 //--------------------------------------------------------------
 void Renderer::draw(){ 
-	ofDrawCircle(100, 100, 100);
-    ofDrawLine(50, 50, 600, 700);
-    ofDrawRectangle(ofVec2f(300, 350), 40, 200);
+	for (ofVec3f vertex : cube_verts) {
+		ofDrawCircle(transform(vertex), 5);
+	}
 }
 
 //--------------------------------------------------------------

@@ -5,13 +5,28 @@
 #include <vector>
 
 class Renderer : public ofBaseApp {
-   public:
+
+private:
+	// Window parameters
+	int win_width;
+	int win_height;
+	ofVec2f win_center;
+
+
+	//Verticies of a 2x2 cube centered at (0,0,0)
+	ofVec3f cube_verts[8] = {
+		ofVec3f(-1, -1, -1), ofVec3f(-1, -1, 1), ofVec3f(-1, 1, -1), ofVec3f(-1, 1, 1),
+		ofVec3f(1, -1, -1), ofVec3f(1, -1, 1), ofVec3f(1, 1, -1), ofVec3f(1, 1, 1)
+	};
+
+	/**
+		Transforms a point in 3d space to a 2d screen coordinate
+	*/
+	ofVec2f transform(ofVec3f point3d);
+
+public:
     // Constructor passes in window size
     Renderer(int width, int height);
-
-	// Window parameters
-    int win_width;
-    int win_height;
 
     void setup();
     void update();
@@ -28,8 +43,5 @@ class Renderer : public ofBaseApp {
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
-
-
-
 
 };
