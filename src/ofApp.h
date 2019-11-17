@@ -9,6 +9,9 @@
 class Renderer : public ofBaseApp {
 
 private:
+
+	/////////////// VARIABLES \\\\\\\\\\\\\\\\
+
 	// Window parameters
 	int win_width;
 	int win_height;
@@ -17,12 +20,11 @@ private:
 	// Camera parameters
 	ofVec3f cam_pos = ofVec3f(0, 0, 5);
 	ofVec2f cam_rot = ofVec2f(0, 0);	//cam_rot.x = left/right view angle, cam_rot.y = up/down view angle
-	double move_speed = 0.02;
-	double turn_speed = 0.01;
+	double move_speed = 0.06;
+	double turn_speed = 0.02;
 	int field_of_view = 600;
 
 	// Controls
-
 	//						    w      s      a      d    space  shift   up	   down   left   right
 	bool pressed_keys[10] = { false, false, false, false, false, false, false, false, false, false };
 
@@ -32,6 +34,9 @@ private:
 		ofVec3f(1, -1, -1), ofVec3f(1, -1, 1), ofVec3f(1, 1, -1), ofVec3f(1, 1, 1)
 	};
 
+
+	//////////////////// METHODS \\\\\\\\\\\\\\\\\\\\\
+	
 	/**
 		Transforms a point in 3d space to a 2d screen coordinate
 	*/

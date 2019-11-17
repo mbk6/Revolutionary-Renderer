@@ -6,12 +6,12 @@ ofVec2f Renderer::transform(ofVec3f point3d) {
 	// 3d transformation equations from https://www.scratchapixel.com/lessons/3d-basic-rendering/computing-pixel-coordinates-of-3d-point
 	// and https://www.youtube.com/watch?v=g4E9iq0BixA
 
-	//Recenter points based on camera position
+	//Recenter points based on camera position, mazing cam_pos the new origin
 	float x = point3d.x - cam_pos.x;
 	float y = point3d.y - cam_pos.y;
 	float z = point3d.z - cam_pos.z;
 
-	//Rotate x and z by cam_rot[0], then rotate y and z by cam_rot[1]
+	//Rotate x and z by cam_rot[0] about the origin, then y and z by cam_rot[1]
 	rotateCoords(x, z, cam_rot[0]);
 	rotateCoords(y, z, cam_rot[1]);
 
@@ -46,24 +46,32 @@ void Renderer::setup(){
 //--------------------------------------------------------------
 void Renderer::update(){
 	
+	/*
+		Movement System:	Standard wsad movement, relative to current view direction. wsad will only adjust the player's x and z coordinates
+	*/
+
+	//Generate unit vector in direction of camera position, with only x and z components
+	ofVec3f move_direction;
+
 	//Update camera position based on held keys
 	if (pressed_keys[0]) {
-		cam_pos.z -= move_speed;
+		move_direction = ofVec3f(std::sin(cam_rot.x), 0, -1 * std::cos(cam_rot.x));
 	}
 	if (pressed_keys[1]) {
-		cam_pos.z += move_speed;
+		move_direction = -1 * ofVec3f(std::sin(cam_rot.x), 0, -1 * std::cos(cam_rot.x));
 	}
 	if (pressed_keys[2]) {
-		cam_pos.x -= move_speed;
+		move_direction = -1 * ofVec3f(std::cos(cam_rot.x), 0, std::sin(cam_rot.x));
 	}
 	if (pressed_keys[3]) {
-		cam_pos.x += move_speed;
+		move_direction = ofVec3f(std::cos(cam_rot.x), 0, std::sin(cam_rot.x));
 	}
+	//Vertical movement does not depend on camera position
 	if (pressed_keys[4]) {
-		cam_pos.y += move_speed;
+		move_direction = ofVec3f(0, 1, 0);
 	}
 	if (pressed_keys[5]) {
-		cam_pos.y -= move_speed;
+		move_direction = ofVec3f(0, -1, 0);
 	}
 	if (pressed_keys[6]) {
 		cam_rot.y += turn_speed;
@@ -78,7 +86,7 @@ void Renderer::update(){
 		cam_rot.x += turn_speed;
 	}
 
-
+	cam_pos += move_direction * move_speed;
 
 }
 
