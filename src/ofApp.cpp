@@ -53,7 +53,7 @@ void Renderer::update(){
 	//Generate unit vector in direction of camera position, with only x and z components
 	ofVec3f move_direction;
 
-	//Update camera position based on held keys
+	// WSAD movement
 	if (pressed_keys[0]) {
 		move_direction = ofVec3f(std::sin(cam_rot.x), 0, -1 * std::cos(cam_rot.x));
 	}
@@ -66,13 +66,14 @@ void Renderer::update(){
 	if (pressed_keys[3]) {
 		move_direction = ofVec3f(std::cos(cam_rot.x), 0, std::sin(cam_rot.x));
 	}
-	//Vertical movement does not depend on camera position
+	// Vertical movement does not depend on camera position
 	if (pressed_keys[4]) {
 		move_direction = ofVec3f(0, 1, 0);
 	}
 	if (pressed_keys[5]) {
 		move_direction = ofVec3f(0, -1, 0);
 	}
+	// Turning
 	if (pressed_keys[6]) {
 		cam_rot.y += turn_speed;
 	}
@@ -86,6 +87,7 @@ void Renderer::update(){
 		cam_rot.x += turn_speed;
 	}
 
+	// Update camera position
 	cam_pos += move_direction * move_speed;
 
 }
@@ -96,6 +98,7 @@ void Renderer::draw(){
 		ofDrawCircle(transform(vertex), 5);
 	}
 
+	// OSD
 	std::stringstream string_stream;
 	string_stream << "cam_pos: (" << cam_pos.x<<", "<<cam_pos.y<<", "<<cam_pos.z<<")";
 	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 10));
@@ -140,6 +143,9 @@ void Renderer::keyPressed(int key){
 	}
 	if (key == OF_KEY_RIGHT) {
 		pressed_keys[9] = true;
+	}
+	if (key == OF_KEY_ESC) {
+		exit();
 	}
 
 }
@@ -189,17 +195,28 @@ void Renderer::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void Renderer::mouseDragged(int x, int y, int button){
+	ofVec2f current_mouse_pos = ofVec2f(x, -y);
 
+	//Check to see if there is no previously recorded mouse position
+	if (last_mouse_pos == ofVec2f(-1, -1)) {
+		last_mouse_pos = current_mouse_pos;
+	}
+
+	//Subtract the old mouse position from the current position, and update the old mouse position
+	cam_rot += (current_mouse_pos - last_mouse_pos) * 0.002;
+	last_mouse_pos = current_mouse_pos;
 }
 
 //--------------------------------------------------------------
 void Renderer::mousePressed(int x, int y, int button){
-
+	
 }
 
 //--------------------------------------------------------------
 void Renderer::mouseReleased(int x, int y, int button){
-
+	//Reset last mouse position to default state
+	last_mouse_pos.x = -1;
+	last_mouse_pos.y = -1;
 }
 
 //--------------------------------------------------------------

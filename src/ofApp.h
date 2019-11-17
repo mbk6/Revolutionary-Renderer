@@ -16,6 +16,7 @@ private:
 	int win_width;
 	int win_height;
 	ofVec2f win_center;
+	ofVec2f last_mouse_pos = ofVec2f(-1, -1);
 
 	// Camera parameters
 	ofVec3f cam_pos = ofVec3f(0, 0, 5);
