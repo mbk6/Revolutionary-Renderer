@@ -15,6 +15,7 @@ private:
 	// Window parameters
 	int win_width;
 	int win_height;
+	int win_margin[2]; /* The amount of pixels outside width and height of the screen where lines will still be drawn */
 	ofVec2f win_center;
 	ofVec2f last_mouse_pos = ofVec2f(-1, -1);
 
@@ -51,9 +52,14 @@ private:
 	ofVec2f transform(ofVec3f point3d);
 	
 	/**
-		Rotates two corrdinates by a given angle
+		Rotates two coordinates by a given angle
 	*/
 	void rotateCoords(float& coord1, float& coord2, float& angle);
+
+	/**
+		Returns whether an ofVec2f is in the bounds of the screen
+	*/
+	bool inBounds(ofVec2f point2d);
 
 public:
     // Constructor passes in window size

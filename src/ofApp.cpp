@@ -15,13 +15,21 @@ ofVec2f Renderer::transform(ofVec3f point3d) {
 	rotateCoords(x, z, cam_rot[0]);
 	rotateCoords(y, z, cam_rot[1]);
 
-	//Compute perspective scaling value and scale x and y
-	z = field_of_view / z;
-	x *= z;
-	y *= z;
+	//Test if the coordinate is in front of the camera
+	if (z < 0) {
 
-	//Adjust point with respect to the screen center. subtract from x-center and add to y-center to maintain proper coordinate system
-	return ofVec2f(win_center.x - x, win_center.y + y);
+		//Compute perspective scaling value and scale x and y
+		z = field_of_view / z;
+		x *= z;
+		y *= z;
+
+		//Adjust point with respect to the screen center. subtract from x-center and add to y-center to maintain proper coordinate system
+		return ofVec2f(win_center.x - x, win_center.y + y);
+	}
+	else {
+		//Return an out of bounds point so that it is not drawn
+		return ofVec2f(-1*win_margin[0] - 1, -1 * win_margin[1] - 1);
+	}
 }
 
 void Renderer::rotateCoords(float& coord1, float& coord2, float& angle) {
@@ -31,11 +39,17 @@ void Renderer::rotateCoords(float& coord1, float& coord2, float& angle) {
 }
 
 
+bool Renderer::inBounds(ofVec2f point2d)
+{
+	return (point2d.x >= -1*win_margin[0] && point2d.x <= win_width + win_margin[0]) && (point2d.y >= -1*win_margin[1] && point2d.y <= win_height + win_margin[1]);
+}
 
 Renderer::Renderer(int width, int height) {
 	win_width = width;
     win_height = height;
 	win_center = ofVec2f(win_width / 2, win_height / 2);
+	win_margin[0] = win_width / 4;
+	win_margin[1] = win_height / 4;
 }
 
 //--------------------------------------------------------------
@@ -93,15 +107,19 @@ void Renderer::update(){
 }
 
 //--------------------------------------------------------------
-void Renderer::draw(){ 
+void Renderer::draw() { 
 	
-	//Verticies
-	for (ofVec3f vertex : cube_verts) {
-		ofDrawCircle(transform(vertex), 5);
-	}
 	//Edges
+	ofVec2f point0;
+	ofVec2f point1;
 	for (int* edge : cube_edges) {
-		ofDrawLine(transform(cube_verts[edge[0]]), transform(cube_verts[edge[1]]));
+		point0 = transform(cube_verts[edge[0]]);
+		point1 = transform(cube_verts[edge[1]]);
+
+		//Only draw the line if both lines are in bounds
+		if (inBounds(point0) && inBounds(point1)) {
+			ofDrawLine(point0, point1);
+		}
 	}
 
 	// OSD
