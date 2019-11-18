@@ -35,6 +35,13 @@ private:
 		ofVec3f(1, -1, -1), ofVec3f(1, -1, 1), ofVec3f(1, 1, -1), ofVec3f(1, 1, 1)
 	};
 
+	//Pairs of verticies for the edges of the cube (indecies of cube_verts that are connected)
+	int cube_edges[12][2] = {
+		{0, 1}, {1, 5}, {5, 4}, {4, 0}, /*Bottom*/
+		{2, 3}, {3, 7}, {7, 6}, {6, 2}, /*Top*/
+		{0, 2}, {1, 3}, {5, 7}, {4, 6}  /*Sides*/
+	};
+
 
 	//////////////////// METHODS \\\\\\\\\\\\\\\\\\\\\
 	

@@ -51,27 +51,27 @@ void Renderer::update(){
 	*/
 
 	//Generate unit vector in direction of camera position, with only x and z components
-	ofVec3f move_direction;
+	ofVec3f move_direction = ofVec3f(0, 0, 0);
 
 	// WSAD movement
 	if (pressed_keys[0]) {
-		move_direction = ofVec3f(std::sin(cam_rot.x), 0, -1 * std::cos(cam_rot.x));
+		move_direction += ofVec3f(std::sin(cam_rot.x), 0, -1 * std::cos(cam_rot.x));
 	}
 	if (pressed_keys[1]) {
-		move_direction = -1 * ofVec3f(std::sin(cam_rot.x), 0, -1 * std::cos(cam_rot.x));
+		move_direction += -1 * ofVec3f(std::sin(cam_rot.x), 0, -1 * std::cos(cam_rot.x));
 	}
 	if (pressed_keys[2]) {
-		move_direction = -1 * ofVec3f(std::cos(cam_rot.x), 0, std::sin(cam_rot.x));
+		move_direction += -1 * ofVec3f(std::cos(cam_rot.x), 0, std::sin(cam_rot.x));
 	}
 	if (pressed_keys[3]) {
-		move_direction = ofVec3f(std::cos(cam_rot.x), 0, std::sin(cam_rot.x));
+		move_direction += ofVec3f(std::cos(cam_rot.x), 0, std::sin(cam_rot.x));
 	}
 	// Vertical movement does not depend on camera position
 	if (pressed_keys[4]) {
-		move_direction = ofVec3f(0, 1, 0);
+		move_direction += ofVec3f(0, 1, 0);
 	}
 	if (pressed_keys[5]) {
-		move_direction = ofVec3f(0, -1, 0);
+		move_direction += ofVec3f(0, -1, 0);
 	}
 	// Turning
 	if (pressed_keys[6]) {
@@ -94,8 +94,14 @@ void Renderer::update(){
 
 //--------------------------------------------------------------
 void Renderer::draw(){ 
+	
+	//Verticies
 	for (ofVec3f vertex : cube_verts) {
 		ofDrawCircle(transform(vertex), 5);
+	}
+	//Edges
+	for (int* edge : cube_edges) {
+		ofDrawLine(transform(cube_verts[edge[0]]), transform(cube_verts[edge[1]]));
 	}
 
 	// OSD
