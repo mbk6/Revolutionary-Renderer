@@ -65,7 +65,13 @@ void Renderer::setup(){
 			test_cube_edges.push_back(edge);
 		}
 
-		test_cube = Model3D(test_cube_vertices, test_cube_edges, ofColor::green, ofVec3f(0, 0, 0));
+		Model3D test_cube_0 = Model3D(test_cube_vertices, test_cube_edges, ofColor::green, ofVec3f(0, 0, 0));
+		Model3D test_cube_1 = Model3D(test_cube_vertices, test_cube_edges, ofColor::red, ofVec3f(2, 0, -2));
+		Model3D test_cube_2 = Model3D(test_cube_vertices, test_cube_edges, ofColor::blue, ofVec3f(-2, 0, -2));
+
+		models.push_back(test_cube_0);
+		models.push_back(test_cube_1);
+		models.push_back(test_cube_2);
 }
 
 //--------------------------------------------------------------
@@ -131,16 +137,19 @@ void Renderer::draw() {
 	//Edges
 	ofVec2f point0;
 	ofVec2f point1;
-	for (int* edge : test_cube.edges) {
-		point0 = transform(test_cube.vertices[edge[0]] + test_cube.position);
-		point1 = transform(test_cube.vertices[edge[1]] + test_cube.position);
+	for (Model3D model : models) {
+		ofSetColor(model.color);
+		for (int* edge : model.edges) {
+			point0 = transform(model.vertices[edge[0]] + model.position);
+			point1 = transform(model.vertices[edge[1]] + model.position);
 
-		//Only draw the line if both lines are in bounds
-		if (inBounds(point0) && inBounds(point1)) {
-			ofSetColor(test_cube.color);
-			ofDrawLine(point0, point1);
+			//Only draw the line if both lines are in bounds
+			if (inBounds(point0) && inBounds(point1)) {
+				ofDrawLine(point0, point1);
+			}
 		}
 	}
+
 
 	// OSD
 	ofSetColor(ofColor::white);

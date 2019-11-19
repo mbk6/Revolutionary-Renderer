@@ -32,8 +32,8 @@ private:
 	//						    w      s      a      d    space  shift   up	   down   left   right
 	bool pressed_keys[10] = { false, false, false, false, false, false, false, false, false, false };
 
-	//Test cube object for rendering
-	Model3D test_cube;
+	//Vector of 3D models to render in the scene
+	std::vector<Model3D> models;
 
 	//Verticies of a 2x2 cube centered at (0,0,0)
 	ofVec3f cube_verts[8] = {
