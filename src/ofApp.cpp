@@ -38,7 +38,6 @@ void Renderer::rotateCoords(float& coord1, float& coord2, float& angle) {
 	coord2 = coord2 * std::cos(angle) - temp * std::sin(angle);
 }
 
-
 bool Renderer::inBounds(ofVec2f point2d)
 {
 	return (point2d.x >= -1*win_margin[0] && point2d.x <= win_width + win_margin[0]) && (point2d.y >= -1*win_margin[1] && point2d.y <= win_height + win_margin[1]);
@@ -55,6 +54,18 @@ Renderer::Renderer(int width, int height) {
 //--------------------------------------------------------------
 void Renderer::setup(){
 		ofSetBackgroundColor(ofColor::black);
+		
+		//Create test_cube using new Model3D constructor
+		std::vector<ofVec3f> test_cube_vertices;
+		for (ofVec3f vertex : cube_verts) {
+			test_cube_vertices.push_back(vertex);
+		}
+		std::vector<int*> test_cube_edges;
+		for (int* edge : cube_edges) {
+			test_cube_edges.push_back(edge);
+		}
+
+		test_cube = Model3D(test_cube_vertices, test_cube_edges, ofColor::green, ofVec3f(0, 0, 0));
 }
 
 //--------------------------------------------------------------
@@ -90,9 +101,17 @@ void Renderer::update(){
 	// Turning
 	if (pressed_keys[6]) {
 		cam_rot.y += turn_speed;
+		if (std::abs(cam_rot[1]) > max_vertical_angle) {
+			//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
+			cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
+		}
 	}
 	if (pressed_keys[7]) {
 		cam_rot.y -= turn_speed;
+		if (std::abs(cam_rot[1]) > max_vertical_angle) {
+			//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
+			cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
+		}
 	}
 	if (pressed_keys[8]) {
 		cam_rot.x -= turn_speed;
@@ -112,17 +131,19 @@ void Renderer::draw() {
 	//Edges
 	ofVec2f point0;
 	ofVec2f point1;
-	for (int* edge : cube_edges) {
-		point0 = transform(cube_verts[edge[0]]);
-		point1 = transform(cube_verts[edge[1]]);
+	for (int* edge : test_cube.edges) {
+		point0 = transform(test_cube.vertices[edge[0]] + test_cube.position);
+		point1 = transform(test_cube.vertices[edge[1]] + test_cube.position);
 
 		//Only draw the line if both lines are in bounds
 		if (inBounds(point0) && inBounds(point1)) {
+			ofSetColor(test_cube.color);
 			ofDrawLine(point0, point1);
 		}
 	}
 
 	// OSD
+	ofSetColor(ofColor::white);
 	std::stringstream string_stream;
 	string_stream << "cam_pos: (" << cam_pos.x<<", "<<cam_pos.y<<", "<<cam_pos.z<<")";
 	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 10));
@@ -228,6 +249,10 @@ void Renderer::mouseDragged(int x, int y, int button){
 
 	//Subtract the old mouse position from the current position, and update the old mouse position
 	cam_rot += (current_mouse_pos - last_mouse_pos) * 0.002;
+	if (std::abs(cam_rot[1]) > max_vertical_angle) {
+		//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
+		cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
+	}
 	last_mouse_pos = current_mouse_pos;
 }
 

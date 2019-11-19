@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "model3d.h"
 
 #include <vector>
 #include <sstream>
@@ -22,13 +23,17 @@ private:
 	// Camera parameters
 	ofVec3f cam_pos = ofVec3f(0, 0, 5);
 	ofVec2f cam_rot = ofVec2f(0, 0);	//cam_rot.x = left/right view angle, cam_rot.y = up/down view angle
+	float max_vertical_angle = 1.5;		/* Not quite PI/2: can't allow the user to look exactly upward or downward to prevent gimbal lock */
 	double move_speed = 0.06;
-	double turn_speed = 0.02;
+	double turn_speed = 0.015;
 	int field_of_view = 600;
 
 	// Controls
 	//						    w      s      a      d    space  shift   up	   down   left   right
 	bool pressed_keys[10] = { false, false, false, false, false, false, false, false, false, false };
+
+	//Test cube object for rendering
+	Model3D test_cube;
 
 	//Verticies of a 2x2 cube centered at (0,0,0)
 	ofVec3f cube_verts[8] = {
