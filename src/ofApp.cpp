@@ -55,7 +55,7 @@ Renderer::Renderer(int width, int height) {
 void Renderer::setup(){
 		ofSetBackgroundColor(ofColor::black);
 		
-		//Create test_cube using new Model3D constructor
+		//Create test_cube and tetrahedron using new Model3D constructor
 		std::vector<ofVec3f> test_cube_vertices;
 		for (ofVec3f vertex : cube_verts) {
 			test_cube_vertices.push_back(vertex);
@@ -65,13 +65,24 @@ void Renderer::setup(){
 			test_cube_edges.push_back(edge);
 		}
 
+		std::vector<ofVec3f> tetrahedron_vertices;
+		for (ofVec3f vertex : test_tetrahedron_verts) {
+			tetrahedron_vertices.push_back(vertex);
+		}
+		std::vector<int*> tetrahedron_edges;
+		for (int* edge : test_tetrahedron_edges) {
+			tetrahedron_edges.push_back(edge);
+		}
+
 		Model3D test_cube_0 = Model3D(test_cube_vertices, test_cube_edges, ofColor::green, ofVec3f(0, 0, 0));
 		Model3D test_cube_1 = Model3D(test_cube_vertices, test_cube_edges, ofColor::red, ofVec3f(2, 0, -2));
 		Model3D test_cube_2 = Model3D(test_cube_vertices, test_cube_edges, ofColor::blue, ofVec3f(-2, 0, -2));
+		Model3D tetrahedron_0 = Model3D(tetrahedron_vertices, tetrahedron_edges, ofColor::yellow, ofVec3f(2, 0, 2));
 
 		models.push_back(test_cube_0);
 		models.push_back(test_cube_1);
 		models.push_back(test_cube_2);
+		models.push_back(tetrahedron_0);
 }
 
 //--------------------------------------------------------------
@@ -147,6 +158,8 @@ void Renderer::draw() {
 			if (inBounds(point0) && inBounds(point1)) {
 				ofDrawLine(point0, point1);
 			}
+
+			ofDrawCircle(transform(model.position), 5);
 		}
 	}
 

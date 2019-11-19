@@ -48,6 +48,16 @@ private:
 		{0, 2}, {1, 3}, {5, 7}, {4, 6}  /*Sides*/
 	};
 
+	ofVec3f test_tetrahedron_verts[4] = {
+		ofVec3f( 0, 0, 0), ofVec3f(1, 0, 0), ofVec3f(0.5, 0, -std::sin(PI/3)), ofVec3f(0.5, 1, -std::sin(PI / 3) / 2)
+	};
+
+	int test_tetrahedron_edges[12][2] = {
+		{0, 1}, {0, 2}, {0, 3},
+		{1, 2}, {1, 3},
+		{2, 3}
+	};
+
 
 	//////////////////// METHODS \\\\\\\\\\\\\\\\\\\\\
 	

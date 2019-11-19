@@ -5,9 +5,15 @@
 class Model3D {
 
 private:
-
+	/**
+		Fills the model's vertex and edge vectors using an OBJ file at the given file path
+	*/
 	void readFromOBJ(std::string file_path);
 
+	/**
+		Modifies the model's vertex data to be relative to the object's relative center
+	*/
+	void fixVertices();
 
 public:
 	Model3D();
