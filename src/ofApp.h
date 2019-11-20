@@ -13,6 +13,9 @@ private:
 
 	/////////////// VARIABLES \\\\\\\\\\\\\\\\
 
+	// Run Parameters
+	float frame_time = 0; /* in seconds, updated every frame */
+
 	// Window parameters
 	int win_width;
 	int win_height;
@@ -24,9 +27,9 @@ private:
 	ofVec3f cam_pos = ofVec3f(0, 0, 5);
 	ofVec2f cam_rot = ofVec2f(0, 0);	//cam_rot.x = left/right view angle, cam_rot.y = up/down view angle
 	float max_vertical_angle = 1.5;		/* Not quite PI/2: can't allow the user to look exactly upward or downward to prevent gimbal lock */
-	float move_speed = 0.06;
-	float turn_speed = 0.015;
-	float mouse_sensitivity = 0.004;
+	float move_speed = 3; /* Units per second */
+	float turn_speed = 1; /* Radians per second */
+	float mouse_sensitivity = 0.7; /* radians per second */
 	float field_of_view = 600;
 
 	// Controls

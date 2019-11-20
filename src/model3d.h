@@ -12,6 +12,11 @@ private:
 	void readFromOBJ(std::string file_path);
 
 	/**
+		Adds an edge to the edge vector only if it or its reverse are not already in the edge vector
+	*/
+	void addEdge(int vert0, int vert1);
+
+	/**
 		Modifies the model's vertex data to be relative to the object's relative center
 	*/
 	void fixVertices();

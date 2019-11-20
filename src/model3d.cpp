@@ -19,6 +19,7 @@ void Model3D::readFromOBJ(std::string file_path) {
 	}
 
 	std::string file_line;
+	std::string int_string;
 	ofVec3f new_vector;
 	int triangle_verts[3];
 	
@@ -32,22 +33,36 @@ void Model3D::readFromOBJ(std::string file_path) {
 				vertices.push_back(new_vector);
 			}
 			else if (file_line[0] == 'f') {
+
+				//For each token, build int_string using the first set of digits from the string,
+				// then convert it to an int and subtract 1, since all obj indicies are one too large
 				for (int i = 0; i < 3; i++) {
-					obj_reader >> triangle_verts[i];
-					
-					//Indecies in the obj file are always 1 too large
-					triangle_verts[i]--;
-					
-					//Move the fstream to the next token by reading the rest of it into file_line
 					obj_reader >> file_line;
+					int j = 0;
+					while (isdigit(file_line[j])) {
+						int_string += file_line[j];
+						j++;
+					}
+					triangle_verts[i] = stoi(int_string) - 1;
+					int_string = "";
 				}
 
-				edges.push_back(ofVec2f(triangle_verts[0], triangle_verts[1]));
-				edges.push_back(ofVec2f(triangle_verts[1], triangle_verts[2]));
-				edges.push_back(ofVec2f(triangle_verts[2], triangle_verts[0]));
+				//Call the addEdge method, to keep the edge from being double-counted
+				addEdge(triangle_verts[0], triangle_verts[1]);
+				addEdge(triangle_verts[1], triangle_verts[2]);
+				addEdge(triangle_verts[2], triangle_verts[0]);
 			}
 		}
 	}
+}
+
+void Model3D::addEdge(int vert0, int vert1) {
+	for (ofVec2f edge : edges) {
+		if ((vert0 == edge.x && vert1 == edge.y) || (vert0 == edge.y && vert1 == edge.x)) {
+			return;
+		}
+	}
+	edges.push_back(ofVec2f(vert0, vert1));
 }
 
 void Model3D::fixVertices() {

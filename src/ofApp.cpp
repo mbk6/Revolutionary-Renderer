@@ -59,14 +59,17 @@ Renderer::Renderer(int width, int height) {
 void Renderer::setup(){
 		ofSetBackgroundColor(ofColor::black);
 		
-		//Create test_cube using new Model3D constructor
-
-		models.push_back(Model3D("C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\cube.obj", ofColor::green, ofVec3f(0, 0, 0)));
+		//Add objects to the scene using new Model3D constructor
+		models.push_back(Model3D("C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\teapot.obj", ofColor::green, ofVec3f(0, 0, 0)));
 }
 
 //--------------------------------------------------------------
 void Renderer::update(){
 	
+	//Get the last frame time in seconds
+
+	frame_time = ofGetLastFrameTime();
+
 	/*
 		Movement System:	Standard wsad movement, relative to current view direction. wsad will only adjust the player's x and z coordinates
 	*/
@@ -96,28 +99,28 @@ void Renderer::update(){
 	}
 	// Turning
 	if (pressed_keys[6]) {
-		cam_rot.y += turn_speed;
+		cam_rot.y += turn_speed * frame_time;
 		if (std::abs(cam_rot[1]) > max_vertical_angle) {
 			//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
 			cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
 		}
 	}
 	if (pressed_keys[7]) {
-		cam_rot.y -= turn_speed;
+		cam_rot.y -= turn_speed * frame_time;
 		if (std::abs(cam_rot[1]) > max_vertical_angle) {
 			//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
 			cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
 		}
 	}
 	if (pressed_keys[8]) {
-		cam_rot.x -= turn_speed;
+		cam_rot.x -= turn_speed * frame_time;
 	}
 	if (pressed_keys[9]) {
-		cam_rot.x += turn_speed;
+		cam_rot.x += turn_speed * frame_time;
 	}
 
 	// Update camera position
-	cam_pos += move_direction * move_speed;
+	cam_pos += move_direction * move_speed * frame_time;
 
 
 	/*
@@ -141,9 +144,6 @@ void Renderer::draw() {
 			if (inBounds(point0) && inBounds(point1)) {
 				ofDrawLine(point0, point1);
 			}
-			
-			//Draw center
-			ofDrawCircle(transform(model.position), 5);
 		}
 	}
 
@@ -151,15 +151,22 @@ void Renderer::draw() {
 	// OSD - cam_pos, cam_rot, fov
 	ofSetColor(ofColor::white);
 	std::stringstream string_stream;
-	string_stream << "cam_pos: (" << cam_pos.x<<", "<<cam_pos.y<<", "<<cam_pos.z<<")";
+	string_stream << "fps: " << ofGetFrameRate();
 	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 10));
 	string_stream.str("");
-	string_stream << "cam_rot: (" << cam_rot.x << ", " << cam_rot.y << ")";
+	string_stream << "frame time (s): " << frame_time;
 	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 20));
 	string_stream.str("");
-	string_stream << "fov: " << field_of_view;
+	string_stream << "cam_pos: (" << cam_pos.x<<", "<<cam_pos.y<<", "<<cam_pos.z<<")";
 	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 30));
 	string_stream.str("");
+	string_stream << "cam_rot: (" << cam_rot.x << ", " << cam_rot.y << ")";
+	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 40));
+	string_stream.str("");
+	string_stream << "fov: " << field_of_view;
+	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 50));
+	string_stream.str("");
+
 }
 
 //--------------------------------------------------------------
@@ -263,7 +270,7 @@ void Renderer::mouseDragged(int x, int y, int button){
 	}
 
 	//Subtract the old mouse position from the current position, and update the old mouse position
-	cam_rot += (current_mouse_pos - last_mouse_pos) * mouse_sensitivity;
+	cam_rot += (current_mouse_pos - last_mouse_pos) * mouse_sensitivity * frame_time;
 	if (std::abs(cam_rot[1]) > max_vertical_angle) {
 		//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
 		cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
