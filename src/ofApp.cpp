@@ -54,7 +54,6 @@ Renderer::Renderer(int width, int height) {
 
 
 
-
 ////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
 //--------------------------------------------------------------
 void Renderer::setup(){
@@ -176,7 +175,7 @@ void Renderer::draw() {
 	}
 
 
-	// OSD
+	// OSD - cam_pos, cam_rot, fov
 	ofSetColor(ofColor::white);
 	std::stringstream string_stream;
 	string_stream << "cam_pos: (" << cam_pos.x<<", "<<cam_pos.y<<", "<<cam_pos.z<<")";
@@ -184,6 +183,9 @@ void Renderer::draw() {
 	string_stream.str("");
 	string_stream << "cam_rot: (" << cam_rot.x << ", " << cam_rot.y << ")";
 	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 20));
+	string_stream.str("");
+	string_stream << "fov: " << field_of_view;
+	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 30));
 	string_stream.str("");
 }
 
@@ -222,6 +224,12 @@ void Renderer::keyPressed(int key){
 	}
 	if (key == OF_KEY_RIGHT) {
 		pressed_keys[9] = true;
+	}
+	if (key == '=') {
+		field_of_view *= 1.1;
+	}
+	if (key == '-') {
+		field_of_view /= 1.1;
 	}
 	if (key == OF_KEY_ESC) {
 		exit();
@@ -300,6 +308,17 @@ void Renderer::mouseReleased(int x, int y, int button){
 	//Reset last mouse position to default state
 	last_mouse_pos.x = -1;
 	last_mouse_pos.y = -1;
+}
+
+//--------------------------------------------------------------
+void Renderer::mouseScrolled(ofMouseEventArgs& mouse) {
+	//Use scroll wheel to modify FOV
+	if (mouse.scrollY > 0) {
+		field_of_view *= 1.1;
+	}
+	else if (mouse.scrollY < 0) {
+		field_of_view /= 1.1;
+	}
 }
 
 //--------------------------------------------------------------

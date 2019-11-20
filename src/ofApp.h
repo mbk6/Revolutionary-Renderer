@@ -26,7 +26,7 @@ private:
 	float max_vertical_angle = 1.5;		/* Not quite PI/2: can't allow the user to look exactly upward or downward to prevent gimbal lock */
 	double move_speed = 0.06;
 	double turn_speed = 0.015;
-	int field_of_view = 600;
+	float field_of_view = 600;
 
 	// Controls
 	//						    w      s      a      d    space  shift   up	   down   left   right
@@ -90,6 +90,7 @@ public:
     void mouseDragged(int x, int y, int button);
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
+	void mouseScrolled(ofMouseEventArgs& mouse);
     void mouseEntered(int x, int y);
     void mouseExited(int x, int y);
     void windowResized(int w, int h);
