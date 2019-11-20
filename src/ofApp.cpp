@@ -51,6 +51,11 @@ Renderer::Renderer(int width, int height) {
 	win_margin[1] = win_height / 4;
 }
 
+
+
+
+
+////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
 //--------------------------------------------------------------
 void Renderer::setup(){
 		ofSetBackgroundColor(ofColor::black);
@@ -77,7 +82,7 @@ void Renderer::setup(){
 		Model3D test_cube_0 = Model3D(test_cube_vertices, test_cube_edges, ofColor::green, ofVec3f(0, 0, 0));
 		Model3D test_cube_1 = Model3D(test_cube_vertices, test_cube_edges, ofColor::red, ofVec3f(2, 0, -2));
 		Model3D test_cube_2 = Model3D(test_cube_vertices, test_cube_edges, ofColor::blue, ofVec3f(-2, 0, -2));
-		Model3D tetrahedron_0 = Model3D(tetrahedron_vertices, tetrahedron_edges, ofColor::yellow, ofVec3f(2, 0, 2));
+		Model3D tetrahedron_0 = Model3D(tetrahedron_vertices, tetrahedron_edges, ofColor::yellow, ofVec3f(0, 2, -2));
 
 		models.push_back(test_cube_0);
 		models.push_back(test_cube_1);
@@ -140,6 +145,12 @@ void Renderer::update(){
 	// Update camera position
 	cam_pos += move_direction * move_speed;
 
+
+	/*
+		ROTATION
+	*/
+
+	models[3].rotate(ofVec3f(1, 1, 1), 0.01);
 }
 
 //--------------------------------------------------------------
@@ -158,8 +169,9 @@ void Renderer::draw() {
 			if (inBounds(point0) && inBounds(point1)) {
 				ofDrawLine(point0, point1);
 			}
-
-			ofDrawCircle(transform(model.position), 5);
+			
+			//Draw center
+			//ofDrawCircle(transform(model.position), 5);
 		}
 	}
 

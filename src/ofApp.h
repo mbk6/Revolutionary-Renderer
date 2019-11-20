@@ -49,7 +49,7 @@ private:
 	};
 
 	ofVec3f test_tetrahedron_verts[4] = {
-		ofVec3f( 0, 0, 0), ofVec3f(1, 0, 0), ofVec3f(0.5, 0, -std::sin(PI/3)), ofVec3f(0.5, 1, -std::sin(PI / 3) / 2)
+		ofVec3f( 0, 0, 0), ofVec3f(1, 0, 0), ofVec3f(0.5, 0, -std::sin(PI/3)), ofVec3f(0.5, std::sqrt(6) / 3, -0.5 * std::tan(PI / 6))
 	};
 
 	int test_tetrahedron_edges[12][2] = {
