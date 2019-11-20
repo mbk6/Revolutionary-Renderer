@@ -24,8 +24,9 @@ private:
 	ofVec3f cam_pos = ofVec3f(0, 0, 5);
 	ofVec2f cam_rot = ofVec2f(0, 0);	//cam_rot.x = left/right view angle, cam_rot.y = up/down view angle
 	float max_vertical_angle = 1.5;		/* Not quite PI/2: can't allow the user to look exactly upward or downward to prevent gimbal lock */
-	double move_speed = 0.06;
-	double turn_speed = 0.015;
+	float move_speed = 0.06;
+	float turn_speed = 0.015;
+	float mouse_sensitivity = 0.004;
 	float field_of_view = 600;
 
 	// Controls

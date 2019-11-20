@@ -290,7 +290,7 @@ void Renderer::mouseDragged(int x, int y, int button){
 	}
 
 	//Subtract the old mouse position from the current position, and update the old mouse position
-	cam_rot += (current_mouse_pos - last_mouse_pos) * 0.002;
+	cam_rot += (current_mouse_pos - last_mouse_pos) * mouse_sensitivity;
 	if (std::abs(cam_rot[1]) > max_vertical_angle) {
 		//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
 		cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
@@ -300,11 +300,13 @@ void Renderer::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void Renderer::mousePressed(int x, int y, int button){
-	
+	ofHideCursor();
 }
 
 //--------------------------------------------------------------
 void Renderer::mouseReleased(int x, int y, int button){
+	ofShowCursor();
+	
 	//Reset last mouse position to default state
 	last_mouse_pos.x = -1;
 	last_mouse_pos.y = -1;
