@@ -7,16 +7,47 @@ Model3D::Model3D(std::string obj_path_, ofColor color_, ofVec3f position_) {
 	fixVertices();
 }
 
-Model3D::Model3D(std::vector<ofVec3f> vertices_, std::vector<int*> edges_, ofColor color_, ofVec3f position_) {
-	vertices = vertices_;
-	edges = edges_;
-	color = color_;
-	position = position_;
-	fixVertices();
-}
-
 void Model3D::readFromOBJ(std::string file_path) {
-	//Fills the model's vertex and edge vectors using an obj file
+	std::fstream obj_reader;
+
+	obj_reader.open(file_path);
+
+	//Check for invalid opening
+	if (!obj_reader) {
+		std::cout << "Unable to open " << file_path;
+		exit(0);
+	}
+
+	std::string file_line;
+	ofVec3f new_vector;
+	int triangle_verts[3];
+	
+
+	while (obj_reader >> file_line) {
+		if (file_line.size() == 1) {
+			if (file_line[0] == 'v') {
+				obj_reader >> new_vector.x;
+				obj_reader >> new_vector.y;
+				obj_reader >> new_vector.z;
+				vertices.push_back(new_vector);
+			}
+			else if (file_line[0] == 'f') {
+				for (int i = 0; i < 3; i++) {
+					obj_reader >> triangle_verts[i];
+					
+					//Indecies in the obj file are always 1 too large
+					triangle_verts[i]--;
+					
+					//Move the fstream to the next token by reading the rest of it into file_line
+					obj_reader >> file_line;
+				}
+
+				edges.push_back(ofVec2f(triangle_verts[0], triangle_verts[1]));
+				edges.push_back(ofVec2f(triangle_verts[1], triangle_verts[2]));
+				edges.push_back(ofVec2f(triangle_verts[2], triangle_verts[0]));
+			}
+		}
+	}
 }
 
 void Model3D::fixVertices() {
