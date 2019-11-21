@@ -84,16 +84,19 @@ void Model3D::fixVertices(float size_scale) {
 	}
 }
 
-void Model3D::rotateVector(ofVec3f &vector, ofVec3f axis, float angle) {
+void Model3D::rotateVector(ofVec3f &vector, ofVec3f rotation_vector) {
 
-	//Make sure the axis is a normal vector
-	axis.normalize();
+	//Rotation angle is the magnitude of the rotation vector
+	float angle = rotation_vector.length();
+
+	//Normalize the rotation vector
+	rotation_vector.normalize();
 
 	//Rotation matrix from https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
 	
-	float x = axis.x;
-	float y = axis.y;
-	float z = axis.z;
+	float x = rotation_vector.x;
+	float y = rotation_vector.y;
+	float z = rotation_vector.z;
 	float cos = std::cosf(angle);
 	float sin = std::sinf(angle);
 
@@ -114,9 +117,9 @@ void Model3D::rotateVector(ofVec3f &vector, ofVec3f axis, float angle) {
 
 }
 
-void Model3D::rotate(ofVec3f axis, float angle) {
+void Model3D::rotate(ofVec3f rotation_vector) {
 	// Apply the rotateVector() method to each vertex in the model's vertex set
 	for (ofVec3f& vertex : vertices) {
-		rotateVector(vertex, axis, angle);
+		rotateVector(vertex, rotation_vector);
 	}
 }

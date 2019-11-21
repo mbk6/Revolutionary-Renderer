@@ -81,10 +81,15 @@ void Renderer::setup() {
 		// Fill the models vector with models
 		std::string teapot_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\teapot.obj";
 		std::string cube_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\cube.obj";
+		std::string tetrahedron_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\tetrahedron.obj";
+		std::string sphere_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\sphere.obj";
 		
 		//Add objects to the scene using new Model3D constructor
-		models.push_back(Model3D(cube_path, ofColor::green, ofVec3f(0, 0, 0), 1));
-		models.push_back(Model3D(teapot_path, ofColor::red, ofVec3f(5, 0, 0), 1));
+		models.push_back(Model3D(sphere_path, ofColor::green, ofVec3f(0, 0, 0), 0.2));
+		models.push_back(Model3D(cube_path, ofColor::red, ofVec3f(1, 0, 0), 1));
+		models.push_back(Model3D(cube_path, ofColor::yellow, ofVec3f(0, -1, 0), 1));
+		models.push_back(Model3D(tetrahedron_path, ofColor::blue, ofVec3f(0, 1, 0), 0.5));
+		
 
 }
 
@@ -93,6 +98,9 @@ void Renderer::update(){
 	
 	//Get the last frame time in seconds. This will be used to maintain speeds despite an inconsistent framerate
 	frame_time = ofGetLastFrameTime();
+
+	models[0].rotate(ofVec3f(1, 1, 1)* frame_time);
+
 
 	/*
 		Movement System:	Standard wsad movement, relative to current view direction.
@@ -313,7 +321,9 @@ void Renderer::mouseDragged(int x, int y, int button){
 			//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
 			cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
 		}
-		
+		//Update the local basis
+		computeLocalBasis();
+
 		last_mouse_pos = current_mouse_pos;
 	}
 
@@ -328,7 +338,8 @@ void Renderer::mouseDragged(int x, int y, int button){
 				// Compute the distance between the object's projected center and the mouse location, and
 				// Point edit_mode_model to the current closest model
 				mouse_dist = (ofVec2f(x, y) - transform(model.position)).length();
-				if (mouse_dist < grab_range && edit_mode_model_dist < min_mouse_dist) {
+				//Divide the grab range by the object's distance, since a smaller looking object should have a smaller grab range
+				if (mouse_dist < grab_range / (cam_pos - model.position).length() && edit_mode_model_dist < min_mouse_dist) {
 					edit_mode_model = &model;
 					min_mouse_dist = edit_mode_model_dist;
 				}
@@ -374,8 +385,12 @@ void Renderer::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void Renderer::mouseScrolled(ofMouseEventArgs& mouse) {
-	// If left click is held, change the FOV
-	if (mouse.button == 0) {
+	// If currently in edit mode and right click is held, use the local basis to move the selected model towards or away from the camera
+	if (edit_mode && mouse.button == 2) {
+		edit_mode_model->position += mouse.scrollY * local_basis[0] * edit_mode_model_dist* translation_speed * 10;
+	}
+	// Otherwise, change the FOV
+	else {
 		if (mouse.scrollY > 0) {
 			field_of_view *= 1.1;
 		}
@@ -383,10 +398,7 @@ void Renderer::mouseScrolled(ofMouseEventArgs& mouse) {
 			field_of_view /= 1.1;
 		}
 	}
-	// If currently in edit mode and right click is held, use the local basis to move the selected model towards or away from the camera
-	else if (edit_mode && mouse.button == 2) {
-		edit_mode_model->position += mouse.scrollY * local_basis[0] * edit_mode_model_dist* translation_speed * 10;
-	}
+
 }
 
 //--------------------------------------------------------------
