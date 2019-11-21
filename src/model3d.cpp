@@ -1,13 +1,15 @@
 #include "model3d.h"
 
-Model3D::Model3D(std::string obj_path_, ofColor color_, ofVec3f position_) {
+Model3D::Model3D(std::string obj_path_, ofColor color_, ofVec3f position_, float size_scale_) {
 	readFromOBJ(obj_path_);
 	color = color_;
 	position = position_;
-	fixVertices();
+	fixVertices(size_scale_);
 }
 
 void Model3D::readFromOBJ(std::string file_path) {
+	
+	//Open the file with an fstream
 	std::fstream obj_reader;
 
 	obj_reader.open(file_path);
@@ -22,20 +24,25 @@ void Model3D::readFromOBJ(std::string file_path) {
 	std::string int_string;
 	ofVec3f new_vector;
 	int triangle_verts[3];
-	
 
+	//For each line of the file, check for the 'v ' or 'f ' prefix identifying sets of vertices and edges 
 	while (obj_reader >> file_line) {
 		if (file_line.size() == 1) {
+			
+			//Vertices
 			if (file_line[0] == 'v') {
+				//Load the next three floats into a vector and push it into the vertices vector
 				obj_reader >> new_vector.x;
 				obj_reader >> new_vector.y;
 				obj_reader >> new_vector.z;
 				vertices.push_back(new_vector);
 			}
+
+			//Faces
 			else if (file_line[0] == 'f') {
 
-				//For each token, build int_string using the first set of digits from the string,
-				// then convert it to an int and subtract 1, since all obj indicies are one too large
+				//For each of the three tokens following 'f ', build int_string using the first set of digits from the string,
+				// then convert int_string to an int and subtract 1, since all OBJ face indicies are one too large by convention
 				for (int i = 0; i < 3; i++) {
 					obj_reader >> file_line;
 					int j = 0;
@@ -47,7 +54,7 @@ void Model3D::readFromOBJ(std::string file_path) {
 					int_string = "";
 				}
 
-				//Call the addEdge method, to keep the edge from being double-counted
+				//Call the addEdge method to keep the edge from being double-counted
 				addEdge(triangle_verts[0], triangle_verts[1]);
 				addEdge(triangle_verts[1], triangle_verts[2]);
 				addEdge(triangle_verts[2], triangle_verts[0]);
@@ -57,6 +64,7 @@ void Model3D::readFromOBJ(std::string file_path) {
 }
 
 void Model3D::addEdge(int vert0, int vert1) {
+	// Iterate through the edge set checking whether (vert0, vert1) or (vert1, vert0) is already in the set
 	for (ofVec2f edge : edges) {
 		if ((vert0 == edge.x && vert1 == edge.y) || (vert0 == edge.y && vert1 == edge.x)) {
 			return;
@@ -65,13 +73,14 @@ void Model3D::addEdge(int vert0, int vert1) {
 	edges.push_back(ofVec2f(vert0, vert1));
 }
 
-void Model3D::fixVertices() {
+void Model3D::fixVertices(float size_scale) {
 	//Use the std::accumulate function to compute the "center" of the model by averaging its verticies
 	ofVec3f relative_center = std::accumulate(vertices.begin(), vertices.end(), ofVec3f(0, 0, 0)) / vertices.size();
 
-	//Change the basis of the local coordinate system so that each vertex is relative to the center
+	//Change the basis of the local coordinate system so that each vertex is relative to the center, then multiply it by the size scale
 	for (ofVec3f &vertex : vertices) {
 		vertex -= relative_center;
+		vertex *= size_scale;
 	}
 }
 
@@ -106,6 +115,7 @@ void Model3D::rotateVector(ofVec3f &vector, ofVec3f axis, float angle) {
 }
 
 void Model3D::rotate(ofVec3f axis, float angle) {
+	// Apply the rotateVector() method to each vertex in the model's vertex set
 	for (ofVec3f& vertex : vertices) {
 		rotateVector(vertex, axis, angle);
 	}
