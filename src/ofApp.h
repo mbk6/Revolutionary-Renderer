@@ -13,13 +13,17 @@ private:
 
 	/////////////// PROGRAM VARIABLES \\\\\\\\\\\\\\\\
 
-	// Application Parameters
+	// Application parameters
 	float frame_time = 0;						/* frametime in seconds, updated with every call of the update() method */
 	bool edit_mode = false;						/* indicates whether the program is in edit-mode*/
 	std::vector<Model3D> models;				/* Collection of models in the scene */
+	
+	// Edit Mode parameters
 	Model3D* edit_mode_model = nullptr;			/* the current model being edited in edit-mode */
-	float edit_mode_model_dist = 0;					/* the distance from the camera to the chosen model at the time it was chosen */
+	float edit_mode_model_dist = 0;				/* the distance from the camera to the chosen model at the time it was chosen */
 	int grab_range = 200;						/* the distance the mouse needs to be from the center of an object in order to move it in edit mode */
+	float edit_translation_speed = 0.002;		/* Speed at which objects can be moved with in edit mode (unsure of units) */
+	float edit_rotation_speed = 0.01;			/* Speed at which objects can be rotated with in edit mode (unsure of units) */
 
 	// Window parameters
 	int win_width;								/* width of the screen */
@@ -36,8 +40,8 @@ private:
 	float turn_speed = 1;						/* Speed of camera rotation in radians per second */
 	float mouse_sensitivity = 0.5;				/* Speed of camera roation when controlled by mouse. Proportional to radians per second (I think) */
 	float field_of_view = 600;					/* Controls the camera's field of view (unknown units, maybe proportional to 1 / radians?) */
-	ofVec3f local_basis[3];						/* Defines unit vectors pointing forward, right, and up respectively. Updated when entering edit mode */
-	float translation_speed = 0.002;			/* Speed at which objects can be moved with in edit mode (unsure of units) */
+	ofVec3f local_basis[3];						/* Defines unit vectors pointing forward, right, and up respectively. Updated every time the camera turns and when entering edit mode */
+
 
 	// Controls - keys that are held down are represented by booleans turned on and off as they are pressed/released
 	//						    w      s      a      d    space  shift   up	   down   left   right

@@ -84,13 +84,15 @@ void Renderer::setup() {
 		std::string tetrahedron_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\tetrahedron.obj";
 		std::string sphere_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\sphere.obj";
 		
+
 		//Add objects to the scene using new Model3D constructor
+		
+		std::cout << "Generating models...";
 		models.push_back(Model3D(sphere_path, ofColor::green, ofVec3f(0, 0, 0), 0.2));
 		models.push_back(Model3D(cube_path, ofColor::red, ofVec3f(1, 0, 0), 1));
 		models.push_back(Model3D(cube_path, ofColor::yellow, ofVec3f(0, -1, 0), 1));
 		models.push_back(Model3D(tetrahedron_path, ofColor::blue, ofVec3f(0, 1, 0), 0.5));
-		
-
+		std::cout << "Done.";
 }
 
 //--------------------------------------------------------------
@@ -363,7 +365,17 @@ void Renderer::mouseDragged(int x, int y, int button){
 		ofHideCursor();
 		ofVec2f current_mouse_pos = ofVec2f(x, -y);
 		ofVec2f mouse_difference = current_mouse_pos - last_mouse_pos;
-		edit_mode_model->position += (mouse_difference.x * local_basis[1] + mouse_difference.y * local_basis[2]) * edit_mode_model_dist * translation_speed;
+		edit_mode_model->position += (mouse_difference.x * local_basis[1] + mouse_difference.y * local_basis[2]) * edit_mode_model_dist * edit_translation_speed;
+		last_mouse_pos = current_mouse_pos;
+	}
+	// If middle-click, rotate the selected object
+	else if (edit_mode && button == 1) {
+		ofVec2f current_mouse_pos = ofVec2f(x, -y);
+		ofVec2f mouse_difference = current_mouse_pos - last_mouse_pos;
+
+		//Use multiples of the rightward and upward local basis vectors to rotate the selected object
+		ofVec3f rotation_vector = (mouse_difference.x * local_basis[2] - mouse_difference.y * local_basis[1]) * edit_rotation_speed;
+		edit_mode_model->rotate(rotation_vector);
 		last_mouse_pos = current_mouse_pos;
 	}
 }
@@ -375,19 +387,23 @@ void Renderer::mousePressed(int x, int y, int button){
 }
 
 //--------------------------------------------------------------
-void Renderer::mouseReleased(int x, int y, int button){
+void Renderer::mouseReleased(int x, int y, int button) {
+	
+	//Stay in edit mode if the middle button was just released. Otherwise, show th cursor and exit edit mode
+	if (button != 1) {
 	ofShowCursor();
 
 	//End edit mode
 	edit_mode = false;
 	edit_mode_model = nullptr;
+	}
 }
 
 //--------------------------------------------------------------
 void Renderer::mouseScrolled(ofMouseEventArgs& mouse) {
 	// If currently in edit mode and right click is held, use the local basis to move the selected model towards or away from the camera
 	if (edit_mode && mouse.button == 2) {
-		edit_mode_model->position += mouse.scrollY * local_basis[0] * edit_mode_model_dist* translation_speed * 10;
+		edit_mode_model->position += mouse.scrollY * local_basis[0] * edit_mode_model_dist* edit_translation_speed * 10;
 	}
 	// Otherwise, change the FOV
 	else {
