@@ -16,6 +16,7 @@ private:
 	// Application parameters
 	float frame_time = 0;						/* frametime in seconds, updated with every call of the update() method */
 	bool edit_mode = false;						/* indicates whether the program is in edit-mode*/
+	bool walk_mode = true;						/* indicates whether the program is in walk-mode */
 	std::vector<Model3D> models;				/* Collection of models in the scene */
 	
 	// Edit Mode parameters
@@ -25,6 +26,13 @@ private:
 	float edit_translation_speed = 0.002;		/* Speed at which objects can be moved with in edit mode (unsure of units) */
 	float edit_rotation_speed = 0.01;			/* Speed at which objects can be rotated with in edit mode (unsure of units) */
 
+	// Walk mode parameters
+	float floor_height = 0;						/* y coordinate of the floor */
+	float player_height = 1;					/* height from the camera to the floor when standing on the floor */
+	float jump_speed = 5;						/* speed the user can jump */
+	ofVec3f cam_velocity = ofVec3f(0, 0, 0);	/* current velocity of the camera */
+	ofVec3f gravity = ofVec3f(0, -10, 0);		/* gravity vector (units/sec) */
+
 	// Window parameters
 	int win_width;								/* width of the screen */
 	int win_height;								/* height of the screen */
@@ -33,7 +41,7 @@ private:
 	ofVec2f last_mouse_pos = ofVec2f(-1, -1);	/* last recorded screen coordinates of the mouse */
 
 	// Camera parameters
-	ofVec3f cam_pos = ofVec3f(0, 0, 5);			/* Word coordinates of the camera */
+	ofVec3f cam_pos = ofVec3f(0, 1, 5);			/* World coordinates of the camera */
 	ofVec2f cam_rot = ofVec2f(0, 0);			/* The horizontal and vertical rotation of the camera in radians */
 	float max_vertical_angle = 1.5;				/* The maximum angle magnitude the user can look up or down */
 	float move_speed = 3;						/* Speed of camera movement units per second */

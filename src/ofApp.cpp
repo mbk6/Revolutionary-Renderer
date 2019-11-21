@@ -83,6 +83,7 @@ void Renderer::setup() {
 		std::string cube_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\cube.obj";
 		std::string tetrahedron_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\tetrahedron.obj";
 		std::string sphere_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\sphere.obj";
+		std::string plane_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\plane.obj";
 		
 
 		//Add objects to the scene using new Model3D constructor
@@ -92,6 +93,7 @@ void Renderer::setup() {
 		models.push_back(Model3D(cube_path, ofColor::red, ofVec3f(1, 0, 0), 1));
 		models.push_back(Model3D(cube_path, ofColor::yellow, ofVec3f(0, -1, 0), 1));
 		models.push_back(Model3D(tetrahedron_path, ofColor::blue, ofVec3f(0, 1, 0), 0.5));
+		models.push_back(Model3D(plane_path, ofColor::white, ofVec3f(0, floor_height, 0), 1));
 		std::cout << "Done.";
 }
 
@@ -128,12 +130,16 @@ void Renderer::update(){
 	if (pressed_keys[3]) {
 		move_direction += local_basis[1];
 	}
-	// Vertical movement does not depend on camera position
+	// Vertical movement does not depend on camera position. Vertical movement besides jumping is not enabled in walk mode
 	if (pressed_keys[4]) {
-		move_direction += ofVec3f(0, 1, 0);
+		if (!walk_mode) {
+			move_direction += ofVec3f(0, 1, 0);
+		}
 	}
 	if (pressed_keys[5]) {
-		move_direction += ofVec3f(0, -1, 0);
+		if (!walk_mode) {
+			move_direction += ofVec3f(0, -1, 0);
+		}
 	}
 	// Turning
 	if (pressed_keys[6]) {
@@ -167,6 +173,20 @@ void Renderer::update(){
 
 	// Update camera position
 	cam_pos += move_direction * move_speed * frame_time;
+
+
+	// Walk mode
+	if (walk_mode) {
+		if (cam_pos.y >= floor_height + player_height) {
+			cam_velocity += gravity * frame_time;
+			cam_pos += cam_velocity * frame_time;
+		}
+		if (cam_pos.y < floor_height + player_height) {
+			cam_pos.y = floor_height + player_height;
+			cam_velocity.y = 0;
+		}
+	}
+
 
 }
 
@@ -235,6 +255,11 @@ void Renderer::keyPressed(int key){
 	}
 	if (key == ' ') {
 		pressed_keys[4] = true;
+		
+		// In walk mode, let the player jump
+		if (walk_mode) {
+			cam_velocity.y += jump_speed;
+		}
 	}
 	if (key == OF_KEY_SHIFT) {
 		pressed_keys[5] = true;
@@ -261,6 +286,10 @@ void Renderer::keyPressed(int key){
 	}
 	if (key == OF_KEY_ESC) {
 		exit();
+	}
+
+	if (key == 'g') {
+		walk_mode = !walk_mode;
 	}
 
 }
