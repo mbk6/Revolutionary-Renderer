@@ -5,7 +5,7 @@
 
 class Model3D {
 
-private:
+protected:
 	/* Fills the model's vertex and edge vectors using an OBJ file at the given file path */
 	void readFromOBJ(std::string file_path);
 

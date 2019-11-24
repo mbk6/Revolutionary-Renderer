@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "model3d.h"
+#include "physics_body.h"
 
 #include <vector>
 #include <sstream>
@@ -16,8 +16,8 @@ private:
 	// Application parameters
 	float frame_time = 0;						/* frametime in seconds, updated with every call of the update() method */
 	bool edit_mode = false;						/* indicates whether the program is in edit-mode*/
-	bool walk_mode = true;						/* indicates whether the program is in walk-mode */
-	std::vector<Model3D> models;				/* Collection of models in the scene */
+	bool walk_mode = false;						/* indicates whether the program is in walk-mode */
+	std::vector<PhysicsBody> models;			/* Collection of models in the scene */
 	
 	// Edit Mode parameters
 	Model3D* edit_mode_model = nullptr;			/* the current model being edited in edit-mode */

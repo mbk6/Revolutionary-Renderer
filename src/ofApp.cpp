@@ -89,11 +89,11 @@ void Renderer::setup() {
 		//Add objects to the scene using new Model3D constructor
 		
 		std::cout << "Generating models...";
-		models.push_back(Model3D(sphere_path, ofColor::green, ofVec3f(0, 0, 0), 0.2));
-		models.push_back(Model3D(cube_path, ofColor::red, ofVec3f(1, 0, 0), 1));
-		models.push_back(Model3D(cube_path, ofColor::yellow, ofVec3f(0, -1, 0), 1));
-		models.push_back(Model3D(tetrahedron_path, ofColor::blue, ofVec3f(0, 1, 0), 0.5));
-		models.push_back(Model3D(plane_path, ofColor::white, ofVec3f(0, floor_height, 0), 1));
+		models.push_back(PhysicsBody(sphere_path, ofColor::white, 100, ofVec3f(10, 0, 0), ofVec3f(0, 5, 0), ofVec3f(0.5, -0.5, 0.5), 0.1)); /* "Planet" */
+		models.push_back(PhysicsBody(sphere_path, ofColor::green, 200, ofVec3f(0, 0, 8), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.3)); /* "Planet" */
+		models.push_back(PhysicsBody(sphere_path, ofColor::blue, 150, ofVec3f(6, 0, 6), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.2)); /* "Planet" */
+		models.push_back(PhysicsBody(sphere_path, ofColor::red, 100, ofVec3f(0, 0, -10), ofVec3f(4, 0, 0), ofVec3f(-0.5, -0.5, 0.5), 0.1)); /* "Planet" */
+		models.push_back(PhysicsBody(sphere_path, ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 0.5, 0), 0.5)); /* "Sun" */
 		std::cout << "Done.";
 }
 
@@ -102,8 +102,6 @@ void Renderer::update(){
 	
 	//Get the last frame time in seconds. This will be used to maintain speeds despite an inconsistent framerate
 	frame_time = ofGetLastFrameTime();
-
-	models[0].rotate(ofVec3f(1, 1, 1)* frame_time);
 
 
 	/*
@@ -188,6 +186,27 @@ void Renderer::update(){
 	}
 
 
+	/*
+		PHYSICS SYSTEM
+	*/
+	if (frame_time <= 1) {
+		for (PhysicsBody &body0 : models) {
+			for (PhysicsBody& body1 : models) {
+				if (&body0 != &body1) {
+					body0.exertGravity(body1);
+				}
+			}
+		}
+
+
+		//Update and reset force vectors
+		for (PhysicsBody& body : models) {
+			body.update(frame_time);
+			body.force = ofVec3f(0, 0, 0);
+		}
+	}
+
+
 }
 
 //--------------------------------------------------------------
@@ -196,7 +215,7 @@ void Renderer::draw() {
 	//Draw all "wires"
 	ofVec2f point0;
 	ofVec2f point1;
-	for (Model3D model : models) {
+	for (PhysicsBody model : models) {
 		ofSetColor(model.color);
 		for (ofVec2f edge : model.edges) {
 			//Transform the two vertices indicated by the currend edge
