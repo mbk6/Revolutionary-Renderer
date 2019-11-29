@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxGui.h"
 #include "physics_body.h"
 
 #include <vector>
@@ -13,11 +14,24 @@ private:
 
 	/////////////// PROGRAM VARIABLES \\\\\\\\\\\\\\\\
 
+	////// GUI \\\\\\\
+	//New planet panel
+	ofxPanel new_planet_panel;
+	ofxVec3Slider new_planet_pos;
+	ofxVec3Slider new_planet_vel;
+	ofxColorSlider new_planet_color;
+	ofxFloatField new_planet_mass;
+	ofxFloatSlider new_planet_size;
+	ofxButton create_planet_button;
+	ofxButton delete_planets_button;
+
+
 	// Application parameters
 	float frame_time = 0;						/* frametime in seconds, updated with every call of the update() method */
 	bool edit_mode = false;						/* indicates whether the program is in edit-mode*/
 	bool walk_mode = false;						/* indicates whether the program is in walk-mode */
 	std::vector<PhysicsBody> models;			/* Collection of models in the scene */
+	const int MAX_MODEL_COUNT = 10;
 	
 	// Edit Mode parameters
 	Model3D* edit_mode_model = nullptr;			/* the current model being edited in edit-mode */
@@ -57,11 +71,16 @@ private:
 
 
 
+public:
+    
+	/* Constructor passes in window size */
+    Renderer(int width, int height);
+
 	//////////////////// RENDERER METHODS \\\\\\\\\\\\\\\\\\\\\
 	
 	/* Transforms a point in 3d space to a 2d screen coordinate */
 	ofVec2f transform(ofVec3f point3d);
-	
+
 	/* Rotates two coordinates by a given angle */
 	void rotateCoords(float& coord1, float& coord2, float& angle);
 
@@ -71,16 +90,17 @@ private:
 	/* Computes a set of three vectors representing a local basis of the current camera position */
 	void computeLocalBasis();
 
-public:
-    
-	/* Constructor passes in window size */
-    Renderer(int width, int height);
+	//////////////////// GUI BUTTON PRESSES \\\\\\\\\\\\\\\\\
+
+	void createNewPlanet();
+	void deletePlanets();
+
 
 	//////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
     
 	void setup();
-    void update();
-    void draw();
+	void update();
+	void draw();
 
     void keyPressed(int key);
     void keyReleased(int key);

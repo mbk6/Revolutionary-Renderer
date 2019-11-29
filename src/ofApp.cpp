@@ -74,32 +74,44 @@ Renderer::Renderer(int width, int height) {
 //--------------------------------------------------------------
 void Renderer::setup() {
 		ofSetBackgroundColor(ofColor::black);
-		
+
+
+		//////SETUP GUI\\\\\\\\
+
+		new_planet_panel.setup();
+		new_planet_panel.setName("Create Planet");
+		new_planet_panel.setPosition(ofPoint(win_width - new_planet_panel.getWidth(), 0));
+		new_planet_panel.add(new_planet_color.setup("Color", ofColor::white, ofColor::black, ofColor::white));
+		new_planet_panel.add(new_planet_pos.setup("Position", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
+		new_planet_panel.add(new_planet_vel.setup("Velocity", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
+		new_planet_panel.add(new_planet_mass.setup("Mass", 100));
+		new_planet_panel.add(new_planet_size.setup(0.1));
+		new_planet_panel.add(create_planet_button.setup("Create Planet"));
+		new_planet_panel.add(delete_planets_button.setup("Remove All"));
+
+		//Button Listeners
+		create_planet_button.addListener(this, &Renderer::createNewPlanet);
+		delete_planets_button.addListener(this, &Renderer::deletePlanets);
+
+
 		//Set the initial local basis
 		computeLocalBasis();
-
-		// Fill the models vector with models
-		std::string teapot_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\teapot.obj";
-		std::string cube_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\cube.obj";
-		std::string tetrahedron_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\tetrahedron.obj";
-		std::string sphere_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\sphere.obj";
-		std::string plane_path = "C:\\Users\\happy\\source\\repos\\CS126FA19\\fantastic-finale-mbk6\\models\\plane.obj";
 		
 
 		//Add objects to the scene using new Model3D constructor
 		
 		std::cout << "Generating models...";
-		models.push_back(PhysicsBody(sphere_path, ofColor::white, 100, ofVec3f(10, 0, 0), ofVec3f(0, 5, 0), ofVec3f(0.5, -0.5, 0.5), 0.1)); /* "Planet" */
-		models.push_back(PhysicsBody(sphere_path, ofColor::green, 200, ofVec3f(0, 0, 8), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.3)); /* "Planet" */
-		models.push_back(PhysicsBody(sphere_path, ofColor::blue, 150, ofVec3f(6, 0, 6), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.2)); /* "Planet" */
-		models.push_back(PhysicsBody(sphere_path, ofColor::red, 100, ofVec3f(0, 0, -10), ofVec3f(4, 0, 0), ofVec3f(-0.5, -0.5, 0.5), 0.1)); /* "Planet" */
-		models.push_back(PhysicsBody(sphere_path, ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 0.5, 0), 0.5)); /* "Sun" */
+		//models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::white, 100, ofVec3f(10, 0, 0), ofVec3f(0, 5, 0), ofVec3f(0.5, -0.5, 0.5), 0.1)); /* "Planet" */
+		//models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::green, 200, ofVec3f(0, 0, 8), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.3)); /* "Planet" */
+		//models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::blue, 150, ofVec3f(6, 0, 6), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.2)); /* "Planet" */
+		//models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::red, 100, ofVec3f(0, 0, -10), ofVec3f(4, 0, 0), ofVec3f(-0.5, -0.5, 0.5), 0.1)); /* "Planet" */
+		models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
 		std::cout << "Done.";
 }
-
 //--------------------------------------------------------------
 void Renderer::update(){
-	
+
+
 	//Get the last frame time in seconds. This will be used to maintain speeds despite an inconsistent framerate
 	frame_time = ofGetLastFrameTime();
 
@@ -201,7 +213,10 @@ void Renderer::update(){
 
 		//Update and reset force vectors
 		for (PhysicsBody& body : models) {
-			body.update(frame_time);
+			//If in edit mode, don't move the object, so that it can still be "grabbed"
+			if (edit_mode_model != &body) {
+				body.update(frame_time);
+			}
 			body.force = ofVec3f(0, 0, 0);
 		}
 	}
@@ -211,7 +226,9 @@ void Renderer::update(){
 
 //--------------------------------------------------------------
 void Renderer::draw() { 
-	
+	//GUI
+	new_planet_panel.draw();
+
 	//Draw all "wires"
 	ofVec2f point0;
 	ofVec2f point1;
@@ -252,6 +269,23 @@ void Renderer::draw() {
 	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 60));
 	string_stream.str("");
 
+}
+
+//////////////////////////////// GUI BUTTON PRESSES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+void Renderer::createNewPlanet() {
+	if (models.size() < MAX_MODEL_COUNT) {
+		models.push_back(PhysicsBody("..\\models\\sphere.obj", (ofColor)new_planet_color, (float)new_planet_mass, (ofVec3f)new_planet_pos, (ofVec3f)new_planet_vel, ofVec3f(), (float)new_planet_size));
+	}
+	else {
+		//Somehow warn the user that they're at the limit
+	}
+}
+
+void Renderer::deletePlanets() {
+	//Remove everything, then add the sun back
+	models.clear();
+	models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
 }
 
 //--------------------------------------------------------------
@@ -360,7 +394,7 @@ void Renderer::mouseMoved(int x, int y ){
 void Renderer::mouseDragged(int x, int y, int button){
 	// If left-click, change the camera rotation
 	if (button == 0) {
-		ofHideCursor();
+		//ofHideCursor();
 		ofVec2f current_mouse_pos = ofVec2f(x, -y);
 
 		//Subtract the old mouse position from the current position, and update the old mouse position

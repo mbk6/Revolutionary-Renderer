@@ -1,8 +1,8 @@
 #include "ofMain.h"
 #include "ofApp.h"
 
-const int WIDTH = 1024;
-const int HEIGHT = 768;
+const int WIDTH = 1920;
+const int HEIGHT = 1080;
     //========================================================================
 int main( ){
 	ofSetupOpenGL(WIDTH,HEIGHT,OF_WINDOW);			// <-------- setup the GL context
