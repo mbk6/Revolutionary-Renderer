@@ -262,15 +262,6 @@ void Renderer::update(){
 
 //--------------------------------------------------------------
 void Renderer::draw() { 
-	//GUI
-	main_panel.draw();
-	if (current_demo == PLANETS) {
-		new_planet_panel.draw();
-	}
-	else if (current_demo == MODELS) {
-		new_model_panel.draw();
-	}
-
 	//Draw all "wires"
 	ofVec2f point0;
 	ofVec2f point1;
@@ -304,7 +295,14 @@ void Renderer::draw() {
 		}
 	}
 
-
+	//GUI
+	main_panel.draw();
+	if (current_demo == PLANETS) {
+		new_planet_panel.draw();
+	}
+	else if (current_demo == MODELS) {
+		new_model_panel.draw();
+	}
 
 	// OSD - Display frame rate, frame time, camera position/rotation, field of view, and the local basis vectors
 	if (osd_toggle) {
