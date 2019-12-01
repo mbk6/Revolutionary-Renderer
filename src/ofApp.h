@@ -15,24 +15,47 @@ private:
 	/////////////// PROGRAM VARIABLES \\\\\\\\\\\\\\\\
 
 	////// GUI \\\\\\\
+	
+	//Main
+	ofxPanel main_panel;
+	ofxToggle walk_mode_toggle;
+	ofxToggle osd_toggle;
+	ofxToggle floor_toggle;
+	ofxLabel demos_label;
+	ofxButton planets_demo_button;
+	ofxButton models_demo_button;
+
 	//New planet panel
 	ofxPanel new_planet_panel;
+	ofxColorSlider new_planet_color;
 	ofxVec3Slider new_planet_pos;
 	ofxVec3Slider new_planet_vel;
-	ofxColorSlider new_planet_color;
 	ofxFloatField new_planet_mass;
 	ofxFloatSlider new_planet_size;
 	ofxButton create_planet_button;
 	ofxButton delete_planets_button;
 
+	//New model panel
+	ofxPanel new_model_panel;
+	ofxTextField new_model_path;
+	ofxColorSlider new_model_color;
+	ofxVec3Slider new_model_pos;
+	ofxFloatSlider new_model_size;
+	ofxButton create_model_button;
+	ofxButton delete_models_button;
+	
+
+	enum DemoMode {
+		NONE, PLANETS, MODELS
+	};
 
 	// Application parameters
 	float frame_time = 0;						/* frametime in seconds, updated with every call of the update() method */
 	bool edit_mode = false;						/* indicates whether the program is in edit-mode*/
-	bool walk_mode = false;						/* indicates whether the program is in walk-mode */
-	std::vector<PhysicsBody> models;			/* Collection of models in the scene */
+	std::vector<Model3D*> scene_models;			/* Collection of models in the scene */
 	const int MAX_MODEL_COUNT = 10;
-	
+	DemoMode current_demo = NONE;
+		
 	// Edit Mode parameters
 	Model3D* edit_mode_model = nullptr;			/* the current model being edited in edit-mode */
 	float edit_mode_model_dist = 0;				/* the distance from the camera to the chosen model at the time it was chosen */
@@ -41,11 +64,14 @@ private:
 	float edit_rotation_speed = 0.01;			/* Speed at which objects can be rotated with in edit mode (unsure of units) */
 
 	// Walk mode parameters
-	float floor_height = 0;						/* y coordinate of the floor */
+	float floor_height = -1;						/* y coordinate of the floor */
 	float player_height = 1;					/* height from the camera to the floor when standing on the floor */
 	float jump_speed = 5;						/* speed the user can jump */
 	ofVec3f cam_velocity = ofVec3f(0, 0, 0);	/* current velocity of the camera */
 	ofVec3f gravity = ofVec3f(0, -10, 0);		/* gravity vector (units/sec) */
+
+	//Standard Scene Objects
+	Model3D floor = Model3D("..\\models\\plane.obj", ofColor::gray, ofVec3f(0, floor_height, 0), 1.0f);
 
 	// Window parameters
 	int win_width;								/* width of the screen */
@@ -90,10 +116,16 @@ public:
 	/* Computes a set of three vectors representing a local basis of the current camera position */
 	void computeLocalBasis();
 
+	/* Clears the scene_models vector and deletes all objects in it */
+	void clearScene();
+
 	//////////////////// GUI BUTTON PRESSES \\\\\\\\\\\\\\\\\
 
+	void initPlanetsDemo();
+	void initModelsDemo();
 	void createNewPlanet();
 	void deletePlanets();
+	void createNewModel();
 
 
 	//////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\

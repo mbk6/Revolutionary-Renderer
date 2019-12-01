@@ -7,6 +7,10 @@ Model3D::Model3D(std::string obj_path_, ofColor color_, ofVec3f position_, float
 	fixVertices(size_scale_);
 }
 
+//Virtual destructor does nothing. I just need Model3D to be polymorphic
+Model3D::~Model3D() {
+}
+
 void Model3D::readFromOBJ(std::string file_path) {
 	
 	//Open the file with an fstream

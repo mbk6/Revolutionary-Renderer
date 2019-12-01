@@ -68,6 +68,12 @@ Renderer::Renderer(int width, int height) {
 	win_margin[1] = win_height / 4;
 }
 
+void Renderer::clearScene() {
+	for (int i = 0; i < scene_models.size(); i++) {
+		delete scene_models[i];
+	}
+	scene_models.clear();
+}
 
 
 ////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
@@ -78,10 +84,21 @@ void Renderer::setup() {
 
 		//////SETUP GUI\\\\\\\\
 
+		//Main Panel
+		main_panel.setup();
+		main_panel.setPosition(0, 70);
+		main_panel.add(walk_mode_toggle.setup("Walk Mode", false));
+		main_panel.add(osd_toggle.setup("Show OSD", false));
+		main_panel.add(floor_toggle.setup("Show floor", false));
+		main_panel.add(demos_label.setup("Demos", ""));
+		main_panel.add(planets_demo_button.setup("Planets"));
+		main_panel.add(models_demo_button.setup("Models"));
+
+		//New Planet Panel
 		new_planet_panel.setup();
 		new_planet_panel.setName("Create Planet");
-		new_planet_panel.setPosition(ofPoint(win_width - new_planet_panel.getWidth(), 0));
-		new_planet_panel.add(new_planet_color.setup("Color", ofColor::white, ofColor::black, ofColor::white));
+		new_planet_panel.setPosition(win_width - new_planet_panel.getWidth() - 5, 0);
+		new_planet_panel.add(new_planet_color.setup("Color", ofColor::green, ofColor::black, ofColor::white));
 		new_planet_panel.add(new_planet_pos.setup("Position", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
 		new_planet_panel.add(new_planet_vel.setup("Velocity", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
 		new_planet_panel.add(new_planet_mass.setup("Mass", 100));
@@ -89,9 +106,24 @@ void Renderer::setup() {
 		new_planet_panel.add(create_planet_button.setup("Create Planet"));
 		new_planet_panel.add(delete_planets_button.setup("Remove All"));
 
+		//New Model Panel
+		new_model_panel.setup();
+		new_model_panel.setName("Add Model to Scene");
+		new_model_panel.setPosition(win_width - new_planet_panel.getWidth() - 5, 0);
+		new_model_panel.add(new_model_path.setup("File Path", ".obj"));
+		new_model_panel.add(new_model_color.setup("Color", ofColor::white, ofColor::black, ofColor::white));
+		new_model_panel.add(new_model_pos.setup("Position", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
+		new_model_panel.add(new_model_size.setup("Size Scale", 1, 0, 10));
+		new_model_panel.add(create_model_button.setup("Create Model"));
+		new_model_panel.add(delete_models_button.setup("Remove All"));
+
 		//Button Listeners
+		planets_demo_button.addListener(this, &Renderer::initPlanetsDemo);
+		models_demo_button.addListener(this, &Renderer::initModelsDemo);
 		create_planet_button.addListener(this, &Renderer::createNewPlanet);
 		delete_planets_button.addListener(this, &Renderer::deletePlanets);
+		create_model_button.addListener(this, &Renderer::createNewModel);
+		delete_models_button.addListener(this, &Renderer::clearScene);
 
 
 		//Set the initial local basis
@@ -101,11 +133,6 @@ void Renderer::setup() {
 		//Add objects to the scene using new Model3D constructor
 		
 		std::cout << "Generating models...";
-		//models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::white, 100, ofVec3f(10, 0, 0), ofVec3f(0, 5, 0), ofVec3f(0.5, -0.5, 0.5), 0.1)); /* "Planet" */
-		//models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::green, 200, ofVec3f(0, 0, 8), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.3)); /* "Planet" */
-		//models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::blue, 150, ofVec3f(6, 0, 6), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.2)); /* "Planet" */
-		//models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::red, 100, ofVec3f(0, 0, -10), ofVec3f(4, 0, 0), ofVec3f(-0.5, -0.5, 0.5), 0.1)); /* "Planet" */
-		models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
 		std::cout << "Done.";
 }
 //--------------------------------------------------------------
@@ -142,12 +169,12 @@ void Renderer::update(){
 	}
 	// Vertical movement does not depend on camera position. Vertical movement besides jumping is not enabled in walk mode
 	if (pressed_keys[4]) {
-		if (!walk_mode) {
+		if (!walk_mode_toggle) {
 			move_direction += ofVec3f(0, 1, 0);
 		}
 	}
 	if (pressed_keys[5]) {
-		if (!walk_mode) {
+		if (!walk_mode_toggle) {
 			move_direction += ofVec3f(0, -1, 0);
 		}
 	}
@@ -186,7 +213,7 @@ void Renderer::update(){
 
 
 	// Walk mode
-	if (walk_mode) {
+	if (walk_mode_toggle) {
 		if (cam_pos.y >= floor_height + player_height) {
 			cam_velocity += gravity * frame_time;
 			cam_pos += cam_velocity * frame_time;
@@ -201,23 +228,32 @@ void Renderer::update(){
 	/*
 		PHYSICS SYSTEM
 	*/
+
 	if (frame_time <= 1) {
-		for (PhysicsBody &body0 : models) {
-			for (PhysicsBody& body1 : models) {
-				if (&body0 != &body1) {
-					body0.exertGravity(body1);
+		for (Model3D* model0 : scene_models) {
+			//Dynamic cast method from https://stackoverflow.com/questions/27595076/instanceof-equivalent-in-c?rq=1
+			if (PhysicsBody* body0 = dynamic_cast<PhysicsBody*>(model0)) {
+				for (Model3D* model1 : scene_models) {
+					if (PhysicsBody* body1 = dynamic_cast<PhysicsBody*>(model1)) {
+						if (body0 != body1) {
+							body0->exertGravity(*body1);
+						}
+					}
 				}
 			}
+
 		}
 
 
 		//Update and reset force vectors
-		for (PhysicsBody& body : models) {
+		for (Model3D* model : scene_models) {
 			//If in edit mode, don't move the object, so that it can still be "grabbed"
-			if (edit_mode_model != &body) {
-				body.update(frame_time);
+			if (PhysicsBody* body = dynamic_cast<PhysicsBody*>(model)) {
+				if (edit_mode_model != model) {
+					body->update(frame_time);
+				}
+				body->force = ofVec3f(0, 0, 0);
 			}
-			body.force = ofVec3f(0, 0, 0);
 		}
 	}
 
@@ -227,17 +263,39 @@ void Renderer::update(){
 //--------------------------------------------------------------
 void Renderer::draw() { 
 	//GUI
-	new_planet_panel.draw();
+	main_panel.draw();
+	if (current_demo == PLANETS) {
+		new_planet_panel.draw();
+	}
+	else if (current_demo == MODELS) {
+		new_model_panel.draw();
+	}
 
 	//Draw all "wires"
 	ofVec2f point0;
 	ofVec2f point1;
-	for (PhysicsBody model : models) {
-		ofSetColor(model.color);
-		for (ofVec2f edge : model.edges) {
+
+	if (floor_toggle) {
+		ofSetColor(floor.color);
+		for (ofVec2f edge : floor.edges) {
 			//Transform the two vertices indicated by the currend edge
-			point0 = transform(model.vertices[(int)edge.x] + model.position);
-			point1 = transform(model.vertices[(int)edge.y] + model.position);
+			point0 = transform(floor.vertices[(int)edge.x] + floor.position);
+			point1 = transform(floor.vertices[(int)edge.y] + floor.position);
+
+			//Only draw the edge if both points are in bounds
+			if (inBounds(point0) && inBounds(point1)) {
+				ofDrawLine(point0, point1);
+			}
+		}
+	}
+
+	// Floor
+	for (Model3D* model : scene_models) {
+		ofSetColor(model->color);
+		for (ofVec2f edge : model->edges) {
+			//Transform the two vertices indicated by the currend edge
+			point0 = transform(model->vertices[(int)edge.x] + model->position);
+			point1 = transform(model->vertices[(int)edge.y] + model->position);
 
 			//Only draw the edge if both points are in bounds
 			if (inBounds(point0) && inBounds(point1)) {
@@ -247,35 +305,57 @@ void Renderer::draw() {
 	}
 
 
-	// OSD - Display frame rate, frame time, camera position/rotation, field of view, and the local basis vectors
-	ofSetColor(ofColor::white);
-	std::stringstream string_stream;
-	string_stream << "fps: " << ofGetFrameRate();
-	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 10));
-	string_stream.str("");
-	string_stream << "frame time (s): " << frame_time;
-	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 20));
-	string_stream.str("");
-	string_stream << "cam_pos: (" << cam_pos.x<<", "<<cam_pos.y<<", "<<cam_pos.z<<")";
-	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 30));
-	string_stream.str("");
-	string_stream << "cam_rot: (" << cam_rot.x << ", " << cam_rot.y << ")";
-	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 40));
-	string_stream.str("");
-	string_stream << "fov: " << field_of_view;
-	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 50));
-	string_stream.str("");
-	string_stream << "local_basis: (" << local_basis[0].x << ", " << local_basis[0].y << ", " << local_basis[0].z << "), (" << local_basis[1].x << ", " << local_basis[1].y << ", " << local_basis[1].z << "), (" << local_basis[2].x << ", " << local_basis[2].y << ", " << local_basis[2].z << ")";
-	ofDrawBitmapString(string_stream.str(), ofVec2f(10, 60));
-	string_stream.str("");
 
+	// OSD - Display frame rate, frame time, camera position/rotation, field of view, and the local basis vectors
+	if (osd_toggle) {
+		ofSetColor(ofColor::white);
+		std::stringstream string_stream;
+		string_stream << "fps: " << ofGetFrameRate();
+		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 10));
+		string_stream.str("");
+		string_stream << "frame time (s): " << frame_time;
+		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 20));
+		string_stream.str("");
+		string_stream << "cam_pos: (" << cam_pos.x << ", " << cam_pos.y << ", " << cam_pos.z << ")";
+		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 30));
+		string_stream.str("");
+		string_stream << "cam_rot: (" << cam_rot.x << ", " << cam_rot.y << ")";
+		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 40));
+		string_stream.str("");
+		string_stream << "fov: " << field_of_view;
+		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 50));
+		string_stream.str("");
+		string_stream << "local_basis: (" << local_basis[0].x << ", " << local_basis[0].y << ", " << local_basis[0].z << "), (" << local_basis[1].x << ", " << local_basis[1].y << ", " << local_basis[1].z << "), (" << local_basis[2].x << ", " << local_basis[2].y << ", " << local_basis[2].z << ")";
+		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 60));
+		string_stream.str("");
+	}
 }
 
 //////////////////////////////// GUI BUTTON PRESSES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+void Renderer::initPlanetsDemo() {
+	//Clear models and add demo planet set
+	current_demo = PLANETS;
+	clearScene();
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::white, 100, ofVec3f(10, 0, 0), ofVec3f(0, 5, 0), ofVec3f(0.5, -0.5, 0.5), 0.1)); /* "Planet" */
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::green, 200, ofVec3f(0, 0, 8), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.12)); /* "Planet" */
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::blue, 150, ofVec3f(6, 0, 6), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.2)); /* "Planet" */
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::red, 100, ofVec3f(0, 0, -10), ofVec3f(4, 0, 0), ofVec3f(-0.5, -0.5, 0.5), 0.1)); /* "Planet" */
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
+}
+
+void Renderer::initModelsDemo() {
+	//Clear models and add demo models set
+	current_demo = MODELS;
+	clearScene();
+	scene_models.push_back(new Model3D("..\\models\\teapot.obj", ofColor::white, ofVec3f(1, 0, 0), 0.4));
+	scene_models.push_back(new Model3D("..\\models\\cube.obj", ofColor::green, ofVec3f(-1, 0, 0), 1));
+
+}
+
 void Renderer::createNewPlanet() {
-	if (models.size() < MAX_MODEL_COUNT) {
-		models.push_back(PhysicsBody("..\\models\\sphere.obj", (ofColor)new_planet_color, (float)new_planet_mass, (ofVec3f)new_planet_pos, (ofVec3f)new_planet_vel, ofVec3f(), (float)new_planet_size));
+	if (scene_models.size() < MAX_MODEL_COUNT) {
+		scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", (ofColor)new_planet_color, (float)new_planet_mass, (ofVec3f)new_planet_pos, (ofVec3f)new_planet_vel, ofVec3f(), (float)new_planet_size));
 	}
 	else {
 		//Somehow warn the user that they're at the limit
@@ -283,9 +363,13 @@ void Renderer::createNewPlanet() {
 }
 
 void Renderer::deletePlanets() {
-	//Remove everything, then add the sun back
-	models.clear();
-	models.push_back(PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
+	//Clear the scene, then add the sun back
+	clearScene();
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
+}
+
+void Renderer::createNewModel() {
+	scene_models.push_back(new Model3D((std::string)new_model_path, (ofColor)new_model_color, (ofVec3f)new_model_pos, (float)new_model_size));
 }
 
 //--------------------------------------------------------------
@@ -310,7 +394,7 @@ void Renderer::keyPressed(int key){
 		pressed_keys[4] = true;
 		
 		// In walk mode, let the player jump
-		if (walk_mode) {
+		if (walk_mode_toggle) {
 			cam_velocity.y += jump_speed;
 		}
 	}
@@ -340,11 +424,6 @@ void Renderer::keyPressed(int key){
 	if (key == OF_KEY_ESC) {
 		exit();
 	}
-
-	if (key == 'g') {
-		walk_mode = !walk_mode;
-	}
-
 }
 
 //--------------------------------------------------------------
@@ -418,13 +497,13 @@ void Renderer::mouseDragged(int x, int y, int button){
 			//Entering edit-mode:	Find the object whose projected center is closest to the mouse
 			float min_mouse_dist = std::numeric_limits<float>::max();
 			float mouse_dist;
-			for (Model3D& model : models) {
+			for (Model3D* model : scene_models) {
 				// Compute the distance between the object's projected center and the mouse location, and
 				// Point edit_mode_model to the current closest model
-				mouse_dist = (ofVec2f(x, y) - transform(model.position)).length();
+				mouse_dist = (ofVec2f(x, y) - transform(model->position)).length();
 				//Divide the grab range by the object's distance, since a smaller looking object should have a smaller grab range
-				if (mouse_dist < grab_range / (cam_pos - model.position).length() && edit_mode_model_dist < min_mouse_dist) {
-					edit_mode_model = &model;
+				if (mouse_dist < grab_range / (cam_pos - model->position).length() && edit_mode_model_dist < min_mouse_dist) {
+					edit_mode_model = model;
 					min_mouse_dist = edit_mode_model_dist;
 				}
 			}
