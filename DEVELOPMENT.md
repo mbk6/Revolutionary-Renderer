@@ -2,7 +2,6 @@
 
 
 
-
 * 11/15/19 - Generated project, added openFrameworks ofxGui and ofxVectorGraphics, learned how to draw simple 2D shapes and change colors.
 * 11/16/19 - Began basic perspective rendering by displaying the vertices of a cube. Added camera movement with wsad/space/shift and camera rotation with arrow keys.
 * 11/17/19 - Fixed camera movement to be relative to view angle, added ability to control the camera with the mouse, began using lines to render edges
@@ -13,6 +12,7 @@
 * 11/23/19 - Began physics simulation: created PhysicsBody class extending Model3D for controlling physical behavior of a model. Used copies of sphere.obj to simulate a simple planetary orbit system.
 * 11/29/19 - Added GUI panel for adding and removing planets from the orbit system.
 * 11/30/19 - Added extra toggles to the main GUI panel, and added the Models Demo, where the user can add new models to the scene.
+* 11/31/19 - Began writing tests for the Renderer and Model3D objects.
 
 **Upcoming:**
 
