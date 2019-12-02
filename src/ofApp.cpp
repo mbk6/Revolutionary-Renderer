@@ -81,7 +81,6 @@ void Renderer::clearScene() {
 void Renderer::setup() {
 		ofSetBackgroundColor(ofColor::black);
 
-
 		//////SETUP GUI\\\\\\\\
 
 		//Main Panel
@@ -110,10 +109,9 @@ void Renderer::setup() {
 		new_model_panel.setup();
 		new_model_panel.setName("Add Model to Scene");
 		new_model_panel.setPosition(win_width - new_planet_panel.getWidth() - 5, 0);
-		new_model_panel.add(new_model_path.setup("File Path", ".obj"));
 		new_model_panel.add(new_model_color.setup("Color", ofColor::white, ofColor::black, ofColor::white));
 		new_model_panel.add(new_model_pos.setup("Position", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
-		new_model_panel.add(new_model_size.setup("Size Scale", 1, 0, 10));
+		new_model_panel.add(new_model_size.setup("Size Scale", 1, 0, 2));
 		new_model_panel.add(create_model_button.setup("Create Model"));
 		new_model_panel.add(delete_models_button.setup("Remove All"));
 
@@ -367,7 +365,12 @@ void Renderer::deletePlanets() {
 }
 
 void Renderer::createNewModel() {
-	scene_models.push_back(new Model3D((std::string)new_model_path, (ofColor)new_model_color, (ofVec3f)new_model_pos, (float)new_model_size));
+	//https://openframeworks.cc/documentation/utils/ofSystemUtils/#show_ofSystemLoadDialog
+	ofFileDialogResult read_file = ofSystemLoadDialog("Choose File");
+	if (read_file.bSuccess) {
+		scene_models.push_back(new Model3D(read_file.getPath(), (ofColor)new_model_color, (ofVec3f)new_model_pos, (float)new_model_size));
+	}
+
 }
 
 //--------------------------------------------------------------

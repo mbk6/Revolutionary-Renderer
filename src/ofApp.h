@@ -37,7 +37,6 @@ private:
 
 	//New model panel
 	ofxPanel new_model_panel;
-	ofxTextField new_model_path;
 	ofxColorSlider new_model_color;
 	ofxVec3Slider new_model_pos;
 	ofxFloatSlider new_model_size;
@@ -71,7 +70,7 @@ private:
 	ofVec3f gravity = ofVec3f(0, -10, 0);		/* gravity vector (units/sec) */
 
 	//Standard Scene Objects
-	Model3D floor = Model3D("..\\models\\plane.obj", ofColor::gray, ofVec3f(0, floor_height, 0), 1.0f);
+	Model3D floor = Model3D("..\\models\\plane_50x50.obj", ofColor::gray, ofVec3f(0, floor_height, 0), 1.0f);
 
 	// Window parameters
 	int win_width;								/* width of the screen */
