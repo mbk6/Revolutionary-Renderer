@@ -271,53 +271,58 @@ void Renderer::createNewModel() {
 ////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
 //--------------------------------------------------------------
 void Renderer::setup() {
-		ofSetBackgroundColor(ofColor::black);
-
-		//////SETUP GUI\\\\\\\\
-
-		//Main Panel
-		main_panel.setup();
-		main_panel.setPosition(0, 70);
-		main_panel.add(walk_mode_toggle.setup("Walk Mode", false));
-		main_panel.add(osd_toggle.setup("Show OSD", false));
-		main_panel.add(floor_toggle.setup("Show floor", false));
-		main_panel.add(demos_label.setup("Demos", ""));
-		main_panel.add(planets_demo_button.setup("Planets"));
-		main_panel.add(models_demo_button.setup("Models"));
-
-		//New Planet Panel
-		new_planet_panel.setup();
-		new_planet_panel.setName("Create Planet");
-		new_planet_panel.setPosition(win_width - new_planet_panel.getWidth() - 5, 0);
-		new_planet_panel.add(new_planet_color.setup("Color", ofColor::green, ofColor::black, ofColor::white));
-		new_planet_panel.add(new_planet_pos.setup("Position", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
-		new_planet_panel.add(new_planet_vel.setup("Velocity", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
-		new_planet_panel.add(new_planet_mass.setup("Mass", 100));
-		new_planet_panel.add(new_planet_size.setup(0.1));
-		new_planet_panel.add(create_planet_button.setup("Create Planet"));
-		new_planet_panel.add(delete_planets_button.setup("Remove All"));
-
-		//New Model Panel
-		new_model_panel.setup();
-		new_model_panel.setName("Add Model to Scene");
-		new_model_panel.setPosition(win_width - new_planet_panel.getWidth() - 5, 0);
-		new_model_panel.add(new_model_color.setup("Color", ofColor::white, ofColor::black, ofColor::white));
-		new_model_panel.add(new_model_pos.setup("Position", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
-		new_model_panel.add(new_model_size.setup("Size Scale", 1, 0, 2));
-		new_model_panel.add(create_model_button.setup("Create Model"));
-		new_model_panel.add(delete_models_button.setup("Remove All"));
-
-		//Button Listeners
-		planets_demo_button.addListener(this, &Renderer::initPlanetsDemo);
-		models_demo_button.addListener(this, &Renderer::initModelsDemo);
-		create_planet_button.addListener(this, &Renderer::createNewPlanet);
-		delete_planets_button.addListener(this, &Renderer::deletePlanets);
-		create_model_button.addListener(this, &Renderer::createNewModel);
-		delete_models_button.addListener(this, &Renderer::clearScene);
+		
+	webcam.setup(200, 200);
 
 
-		//Set the initial local basis
-		computeLocalBasis();
+
+
+	ofSetBackgroundColor(ofColor::black);
+
+	//////SETUP GUI\\\\\\\\
+
+	//Main Panel
+	main_panel.setup();
+	main_panel.setPosition(0, 70);
+	main_panel.add(walk_mode_toggle.setup("Walk Mode", false));
+	main_panel.add(osd_toggle.setup("Show OSD", false));
+	main_panel.add(floor_toggle.setup("Show floor", false));
+	main_panel.add(demos_label.setup("Demos", ""));
+	main_panel.add(planets_demo_button.setup("Planets"));
+	main_panel.add(models_demo_button.setup("Models"));
+
+	//New Planet Panel
+	new_planet_panel.setup();
+	new_planet_panel.setName("Create Planet");
+	new_planet_panel.setPosition(win_width - new_planet_panel.getWidth() - 5, 0);
+	new_planet_panel.add(new_planet_color.setup("Color", ofColor::green, ofColor::black, ofColor::white));
+	new_planet_panel.add(new_planet_pos.setup("Position", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
+	new_planet_panel.add(new_planet_vel.setup("Velocity", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
+	new_planet_panel.add(new_planet_mass.setup("Mass", 100));
+	new_planet_panel.add(new_planet_size.setup(0.1));
+	new_planet_panel.add(create_planet_button.setup("Create Planet"));
+	new_planet_panel.add(delete_planets_button.setup("Remove All"));
+
+	//New Model Panel
+	new_model_panel.setup();
+	new_model_panel.setName("Add Model to Scene");
+	new_model_panel.setPosition(win_width - new_planet_panel.getWidth() - 5, 0);
+	new_model_panel.add(new_model_color.setup("Color", ofColor::white, ofColor::black, ofColor::white));
+	new_model_panel.add(new_model_pos.setup("Position", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
+	new_model_panel.add(new_model_size.setup("Size Scale", 1, 0, 2));
+	new_model_panel.add(create_model_button.setup("Create Model"));
+	new_model_panel.add(delete_models_button.setup("Remove All"));
+
+	//Button Listeners
+	planets_demo_button.addListener(this, &Renderer::initPlanetsDemo);
+	models_demo_button.addListener(this, &Renderer::initModelsDemo);
+	create_planet_button.addListener(this, &Renderer::createNewPlanet);
+	delete_planets_button.addListener(this, &Renderer::deletePlanets);
+	create_model_button.addListener(this, &Renderer::createNewModel);
+	delete_models_button.addListener(this, &Renderer::clearScene);
+
+	//Set the initial local basis
+	computeLocalBasis();
 }
 
 //--------------------------------------------------------------
@@ -331,11 +336,16 @@ void Renderer::update(){
 
 	//Update all physical interactions in the scene
 	updatePhysics();
+
+	webcam.update();
+	myTexture.allocate(webcam.getPixels());
+
+
+	//webcam_image.warpPerspective(ofPoint(0, 0), ofPoint(250, 0), ofPoint(200, 200), ofPoint(0, 250));
 }
 
 //--------------------------------------------------------------
 void Renderer::draw() { 
-
 	//Draw the floor
 	if (floor_toggle) {
 		drawModel(&floor);
@@ -378,6 +388,10 @@ void Renderer::draw() {
 		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 60));
 		string_stream.str("");
 	}
+
+
+	myTexture.draw((ofPoint)transform(ofVec3f(-1, 0, 0)), (ofPoint)transform(ofVec3f(-1, 2, 0)), (ofPoint)transform(ofVec3f(1, 2, 0)), (ofPoint)transform(ofVec3f(1, 0, 0)));
+
 }
 
 //--------------------------------------------------------------

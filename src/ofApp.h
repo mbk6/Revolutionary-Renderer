@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
+#include "ofxOpenCv.h"
 #include "physics_body.h"
 
 #include <vector>
@@ -54,6 +55,10 @@ private:
 	std::vector<Model3D*> scene_models;			/* Collection of models in the scene */
 	const int MAX_MODEL_COUNT = 10;				/* The maximum number of models allowed in the scene */
 	DemoMode current_demo = NONE;				/* The current demo mode */
+
+	ofxCvColorImage webcam_image;
+	ofVideoGrabber webcam;						/* Videograbber object used for webcam input */
+	ofTexture myTexture;
 		
 	// Edit Mode parameters
 	Model3D* edit_mode_model = nullptr;			/* the current model being edited in edit-mode */
