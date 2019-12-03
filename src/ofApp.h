@@ -78,9 +78,11 @@ private:
 	int win_margin[2];							/* The amount of pixels outside width and height of the screen where lines will still be drawn */
 	ofVec2f win_center;							/* center of the screen */
 	ofVec2f last_mouse_pos = ofVec2f(-1, -1);	/* last recorded screen coordinates of the mouse */
+	ofVec2f out_of_bounds_point;				/* Point to return if intended not to be drawn on the screen */
+
 
 	// Camera parameters
-	ofVec3f cam_pos = ofVec3f(0, 1, 5);			/* World coordinates of the camera */
+	ofVec3f cam_pos = ofVec3f(0, 0, 5);			/* World coordinates of the camera */
 	ofVec2f cam_rot = ofVec2f(0, 0);			/* The horizontal and vertical rotation of the camera in radians */
 	float max_vertical_angle = 1.5;				/* The maximum angle magnitude the user can look up or down */
 	float move_speed = 3;						/* Speed of camera movement units per second */
@@ -107,7 +109,7 @@ public:
 	ofVec2f transform(ofVec3f point3d);
 
 	/* Rotates two coordinates by a given angle */
-	void rotateCoords(float& coord1, float& coord2, float& angle);
+	void rotateCoords(float& coord0, float& coord1, float angle);
 
 	/* Updates the camera position and rotation based on user controls */
 	void updateCamera();

@@ -28,15 +28,15 @@ ofVec2f Renderer::transform(ofVec3f point3d) {
 	}
 	else {
 		//Return an out of bounds point so that it is not drawn
-		return ofVec2f(-1*win_margin[0] - 1, -1 * win_margin[1] - 1);
+		return out_of_bounds_point;
 	}
 }
 
-void Renderer::rotateCoords(float& coord1, float& coord2, float& angle) {
+void Renderer::rotateCoords(float& coord0, float& coord1, float angle) {
 	//Rotation equation from https://www.youtube.com/watch?v=g4E9iq0BixA
-	float temp = coord1;
-	coord1 = temp * std::cos(angle) + coord2 * std::sin(angle);
-	coord2 = coord2 * std::cos(angle) - temp * std::sin(angle);
+	float temp = coord0;
+	coord0 = temp * std::cos(angle) + coord1 * std::sin(angle);
+	coord1 = coord1 * std::cos(angle) - temp * std::sin(angle);
 }
 
 bool Renderer::inBounds(ofVec2f point2d)
@@ -217,6 +217,7 @@ Renderer::Renderer(int width, int height) {
 	// Set the margins to be a quarter of the size of the width/height
 	win_margin[0] = win_width / 4;
 	win_margin[1] = win_height / 4;
+	out_of_bounds_point = ofVec2f(-1 * win_margin[0] - 1, -1 * win_margin[1] - 1);
 }
 
 
