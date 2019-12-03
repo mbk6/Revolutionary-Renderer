@@ -102,7 +102,7 @@ public:
     Renderer(int width, int height);
 
 	//////////////////// RENDERER METHODS \\\\\\\\\\\\\\\\\\\\\
-	
+
 	/* Transforms a point in 3d space to a 2d screen coordinate */
 	ofVec2f transform(ofVec3f point3d);
 
@@ -111,6 +111,9 @@ public:
 
 	/* Returns whether an ofVec2f is in the bounds of the screen */
 	bool inBounds(ofVec2f point2d);
+
+	/* Draws 3D Model on the screen */
+	void drawModel(Model3D* model);
 
 	/* Computes a set of three vectors representing a local basis of the current camera position */
 	void computeLocalBasis();

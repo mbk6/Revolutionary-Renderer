@@ -45,6 +45,23 @@ bool Renderer::inBounds(ofVec2f point2d)
 	return (point2d.x >= -1*win_margin[0] && point2d.x <= win_width + win_margin[0]) && (point2d.y >= -1*win_margin[1] && point2d.y <= win_height + win_margin[1]);
 }
 
+void Renderer::drawModel(Model3D* model) {
+	ofSetColor(model->color);
+	//Draw all "wires"
+	ofVec2f point0;
+	ofVec2f point1;
+	for (ofVec2f edge : model->edges) {
+		//Transform the two vertices indicated by the currend edge
+		point0 = transform(model->vertices[(int)edge.x] + model->position);
+		point1 = transform(model->vertices[(int)edge.y] + model->position);
+
+		//Only draw the edge if both points are in bounds
+		if (inBounds(point0) && inBounds(point1)) {
+			ofDrawLine(point0, point1);
+		}
+	}
+}
+
 void Renderer::computeLocalBasis() {
 	// Equation derived by me!
 	
@@ -74,6 +91,7 @@ void Renderer::clearScene() {
 	}
 	scene_models.clear();
 }
+
 
 
 ////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
@@ -260,37 +278,15 @@ void Renderer::update(){
 
 //--------------------------------------------------------------
 void Renderer::draw() { 
-	//Draw all "wires"
-	ofVec2f point0;
-	ofVec2f point1;
 
+	//Draw the floor
 	if (floor_toggle) {
-		ofSetColor(floor.color);
-		for (ofVec2f edge : floor.edges) {
-			//Transform the two vertices indicated by the currend edge
-			point0 = transform(floor.vertices[(int)edge.x] + floor.position);
-			point1 = transform(floor.vertices[(int)edge.y] + floor.position);
-
-			//Only draw the edge if both points are in bounds
-			if (inBounds(point0) && inBounds(point1)) {
-				ofDrawLine(point0, point1);
-			}
-		}
+		drawModel(&floor);
 	}
 
-	// Floor
+	//Draw all scene models
 	for (Model3D* model : scene_models) {
-		ofSetColor(model->color);
-		for (ofVec2f edge : model->edges) {
-			//Transform the two vertices indicated by the currend edge
-			point0 = transform(model->vertices[(int)edge.x] + model->position);
-			point1 = transform(model->vertices[(int)edge.y] + model->position);
-
-			//Only draw the edge if both points are in bounds
-			if (inBounds(point0) && inBounds(point1)) {
-				ofDrawLine(point0, point1);
-			}
-		}
+		drawModel(model);
 	}
 
 	//GUI
@@ -348,6 +344,7 @@ void Renderer::initModelsDemo() {
 	scene_models.push_back(new Model3D("..\\models\\cube.obj", ofColor::green, ofVec3f(-1, 0, 0), 1));
 
 }
+
 
 void Renderer::createNewPlanet() {
 	if (scene_models.size() < MAX_MODEL_COUNT) {
@@ -493,7 +490,7 @@ void Renderer::mouseDragged(int x, int y, int button){
 
 	// If right-click, enter and execute edit mode
 	else if (button == 2) {
-		
+
 		if (!edit_mode) {
 			//Entering edit-mode:	Find the object whose projected center is closest to the mouse
 			float min_mouse_dist = std::numeric_limits<float>::max();
@@ -529,6 +526,7 @@ void Renderer::mouseDragged(int x, int y, int button){
 		ofVec2f mouse_difference = current_mouse_pos - last_mouse_pos;
 		edit_mode_model->position += (mouse_difference.x * local_basis[1] + mouse_difference.y * local_basis[2]) * edit_mode_model_dist * edit_translation_speed;
 		last_mouse_pos = current_mouse_pos;
+	
 	}
 	// If middle-click, rotate the selected object
 	else if (edit_mode && button == 1) {
