@@ -75,6 +75,140 @@ void Renderer::computeLocalBasis() {
 	local_basis[2] = local_basis[1].getCrossed(local_basis[0]).normalize();
 }
 
+void Renderer::updateCamera() {
+	/*
+	Movement System:
+	Standard WSAD/SHIFT/SPACE movement relative to current view direction.
+	wsad will only adjust the camera's x and z coordinates, while space and shift will move it only in the y direction.
+	Check the corresponding element of pressed_keys to see if a key is currently pressed.
+	Use the local basis to deterimine which way to move, and update it whenever the camera turns.
+	*/
+
+	//Generate unit vector in direction of camera position, with only x and z components. Start with an empty vector
+	ofVec3f move_direction = ofVec3f();
+
+	// W
+	if (pressed_keys[0]) {
+		//Subtract off the y compoment of local_basis[0], since the camera shouldn't move in the y direction
+		move_direction += (local_basis[0] - ofVec3f(0, local_basis[0].y, 0));
+	}
+	// S
+	if (pressed_keys[1]) {
+		//Subtract off the y component of local_basis[0], since the camera shouldn't move in the y direction
+		move_direction -= (local_basis[0] - ofVec3f(0, local_basis[0].y, 0));
+	}
+	// A
+	if (pressed_keys[2]) {
+		move_direction -= local_basis[1];
+	}
+	// D
+	if (pressed_keys[3]) {
+		move_direction += local_basis[1];
+	}
+	// Vertical movement does not depend on camera position. Vertical movement besides jumping is not enabled in walk mode
+	// SPACE
+	if (pressed_keys[4]) {
+		if (!walk_mode_toggle) {
+			move_direction += ofVec3f(0, 1, 0);
+		}
+	}
+	// SHIFT
+	if (pressed_keys[5]) {
+		if (!walk_mode_toggle) {
+			move_direction += ofVec3f(0, -1, 0);
+		}
+	}
+	// Turning
+	// UP
+	if (pressed_keys[6]) {
+		cam_rot.y += turn_speed * frame_time;
+		if (std::abs(cam_rot[1]) > max_vertical_angle) {
+			//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
+			cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
+		}
+		//Update the local basis
+		computeLocalBasis();
+	}
+	// DOWN
+	if (pressed_keys[7]) {
+		cam_rot.y -= turn_speed * frame_time;
+		if (std::abs(cam_rot[1]) > max_vertical_angle) {
+			//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
+			cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
+		}
+		//Update the local basis
+		computeLocalBasis();
+	}
+	// LEFT
+	if (pressed_keys[8]) {
+		cam_rot.x -= turn_speed * frame_time;
+		//Update the local basis
+		computeLocalBasis();
+	}
+	// RIGHT
+	if (pressed_keys[9]) {
+		cam_rot.x += turn_speed * frame_time;
+		//Update the local basis
+		computeLocalBasis();
+	}
+
+	// Update camera position
+	cam_pos += move_direction * move_speed * frame_time;
+
+
+	// Walk mode
+	if (walk_mode_toggle) {
+		// Accelerate the camera downwards if the user isn't currently on the "floor"
+		if (cam_pos.y >= floor_height + player_height) {
+			cam_velocity += gravity * frame_time;
+			cam_pos += cam_velocity * frame_time;
+		}
+		if (cam_pos.y < floor_height + player_height) {
+			cam_pos.y = floor_height + player_height;
+			cam_velocity.y = 0;
+		}
+	}
+}
+
+void Renderer::updatePhysics() {
+
+	//If the frame time is too large, don't update anything
+	if (frame_time <= 1) {
+		//Exert gravity between every two PhysicsBodies in the scene
+		for (Model3D* model0 : scene_models) {
+			//Dynamic cast method from https://stackoverflow.com/questions/27595076/instanceof-equivalent-in-c?rq=1
+			if (PhysicsBody* body0 = dynamic_cast<PhysicsBody*>(model0)) {
+				for (Model3D* model1 : scene_models) {
+					if (PhysicsBody* body1 = dynamic_cast<PhysicsBody*>(model1)) {
+						if (body0 != body1) {
+							body0->exertGravity(*body1);
+						}
+					}
+				}
+			}
+
+		}
+
+		//Update and reset all force vectors
+		for (Model3D* model : scene_models) {
+			//If in edit mode, don't move the object, so that it can still be "grabbed"
+			if (PhysicsBody* body = dynamic_cast<PhysicsBody*>(model)) {
+				if (edit_mode_model != model) {
+					body->update(frame_time);
+				}
+				body->force = ofVec3f(0, 0, 0);
+			}
+		}
+	}
+}
+
+void Renderer::clearScene() {
+	for (int i = 0; i < scene_models.size(); i++) {
+		delete scene_models[i];
+	}
+	scene_models.clear();
+}
+
 Renderer::Renderer(int width, int height) {
 	win_width = width;
     win_height = height;
@@ -85,13 +219,52 @@ Renderer::Renderer(int width, int height) {
 	win_margin[1] = win_height / 4;
 }
 
-void Renderer::clearScene() {
-	for (int i = 0; i < scene_models.size(); i++) {
-		delete scene_models[i];
-	}
-	scene_models.clear();
+
+///////////////// GUI BUTTON PRESSES \\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+void Renderer::initPlanetsDemo() {
+	//Clear models and add demo planet set
+	current_demo = PLANETS;
+	clearScene();
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::white, 100, ofVec3f(10, 0, 0), ofVec3f(0, 5, 0), ofVec3f(0.5, -0.5, 0.5), 0.1)); /* "Planet" */
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::green, 200, ofVec3f(0, 0, 8), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.12)); /* "Planet" */
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::blue, 150, ofVec3f(6, 0, 6), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.2)); /* "Planet" */
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::red, 100, ofVec3f(0, 0, -10), ofVec3f(4, 0, 0), ofVec3f(-0.5, -0.5, 0.5), 0.1)); /* "Planet" */
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
 }
 
+void Renderer::initModelsDemo() {
+	//Clear models and add demo models set
+	current_demo = MODELS;
+	clearScene();
+	scene_models.push_back(new Model3D("..\\models\\teapot.obj", ofColor::white, ofVec3f(1, 0, 0), 0.4));
+	scene_models.push_back(new Model3D("..\\models\\cube.obj", ofColor::green, ofVec3f(-1, 0, 0), 1));
+
+}
+
+void Renderer::createNewPlanet() {
+	if (scene_models.size() < MAX_MODEL_COUNT) {
+		scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", (ofColor)new_planet_color, (float)new_planet_mass, (ofVec3f)new_planet_pos, (ofVec3f)new_planet_vel, ofVec3f(), (float)new_planet_size));
+	}
+	else {
+		//Somehow warn the user that they're at the limit
+	}
+}
+
+void Renderer::deletePlanets() {
+	//Clear the scene, then add the sun back
+	clearScene();
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
+}
+
+void Renderer::createNewModel() {
+	//Based on instructions at https://openframeworks.cc/documentation/utils/ofSystemUtils/#show_ofSystemLoadDialog
+	ofFileDialogResult read_file = ofSystemLoadDialog("Choose File");
+	if (read_file.bSuccess) {
+		scene_models.push_back(new Model3D(read_file.getPath(), (ofColor)new_model_color, (ofVec3f)new_model_pos, (float)new_model_size));
+	}
+
+}
 
 
 ////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
@@ -144,136 +317,19 @@ void Renderer::setup() {
 
 		//Set the initial local basis
 		computeLocalBasis();
-		
-
-		//Add objects to the scene using new Model3D constructor
-		
-		std::cout << "Generating models...";
-		std::cout << "Done.";
 }
+
 //--------------------------------------------------------------
 void Renderer::update(){
 
-
-	//Get the last frame time in seconds. This will be used to maintain speeds despite an inconsistent framerate
+	//Get the last frame time in seconds. This will be used to maintain speeds regardless of framerate consistency
 	frame_time = ofGetLastFrameTime();
 
+	//Update the camera position and rotation
+	updateCamera();
 
-	/*
-		Movement System:	Standard wsad movement, relative to current view direction.
-		wsad will only adjust the camera's x and z coordinates, while space and shift will move it only in the y direction
-	*/
-
-	//Generate unit vector in direction of camera position, with only x and z components. Start with an empty vector
-	ofVec3f move_direction = ofVec3f(0, 0, 0);
-	//Use the local basis to deterimine which way to move. Update the local basis whenever the camera turns
-
-	// WSAD movement
-	if (pressed_keys[0]) {
-		//Subtract the nonzero part of local_basis[0], since the camera shouldn't move in the y direction
-		move_direction += (local_basis[0] - ofVec3f(0, local_basis[0].y, 0));
-	}
-	if (pressed_keys[1]) {
-		//Subtract the nonzero part of local_basis[0], since the camera shouldn't move in the y direction
-		move_direction -= (local_basis[0] - ofVec3f(0, local_basis[0].y, 0));
-	}
-	if (pressed_keys[2]) {
-		move_direction -= local_basis[1];
-	}
-	if (pressed_keys[3]) {
-		move_direction += local_basis[1];
-	}
-	// Vertical movement does not depend on camera position. Vertical movement besides jumping is not enabled in walk mode
-	if (pressed_keys[4]) {
-		if (!walk_mode_toggle) {
-			move_direction += ofVec3f(0, 1, 0);
-		}
-	}
-	if (pressed_keys[5]) {
-		if (!walk_mode_toggle) {
-			move_direction += ofVec3f(0, -1, 0);
-		}
-	}
-	// Turning
-	if (pressed_keys[6]) {
-		cam_rot.y += turn_speed * frame_time;
-		if (std::abs(cam_rot[1]) > max_vertical_angle) {
-			//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
-			cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
-		}
-		//Update the local basis
-		computeLocalBasis();
-	}
-	if (pressed_keys[7]) {
-		cam_rot.y -= turn_speed * frame_time;
-		if (std::abs(cam_rot[1]) > max_vertical_angle) {
-			//Change the magnitude of cam_rot[1] back to max_vertical_angle but keep the sign the same
-			cam_rot[1] = std::copysign(max_vertical_angle, cam_rot[1]);
-		}
-		//Update the local basis
-		computeLocalBasis();
-	}
-	if (pressed_keys[8]) {
-		cam_rot.x -= turn_speed * frame_time;
-		//Update the local basis
-		computeLocalBasis();
-	}
-	if (pressed_keys[9]) {
-		cam_rot.x += turn_speed * frame_time;
-		//Update the local basis
-		computeLocalBasis();
-	}
-
-	// Update camera position
-	cam_pos += move_direction * move_speed * frame_time;
-
-
-	// Walk mode
-	if (walk_mode_toggle) {
-		if (cam_pos.y >= floor_height + player_height) {
-			cam_velocity += gravity * frame_time;
-			cam_pos += cam_velocity * frame_time;
-		}
-		if (cam_pos.y < floor_height + player_height) {
-			cam_pos.y = floor_height + player_height;
-			cam_velocity.y = 0;
-		}
-	}
-
-
-	/*
-		PHYSICS SYSTEM
-	*/
-
-	if (frame_time <= 1) {
-		for (Model3D* model0 : scene_models) {
-			//Dynamic cast method from https://stackoverflow.com/questions/27595076/instanceof-equivalent-in-c?rq=1
-			if (PhysicsBody* body0 = dynamic_cast<PhysicsBody*>(model0)) {
-				for (Model3D* model1 : scene_models) {
-					if (PhysicsBody* body1 = dynamic_cast<PhysicsBody*>(model1)) {
-						if (body0 != body1) {
-							body0->exertGravity(*body1);
-						}
-					}
-				}
-			}
-
-		}
-
-
-		//Update and reset force vectors
-		for (Model3D* model : scene_models) {
-			//If in edit mode, don't move the object, so that it can still be "grabbed"
-			if (PhysicsBody* body = dynamic_cast<PhysicsBody*>(model)) {
-				if (edit_mode_model != model) {
-					body->update(frame_time);
-				}
-				body->force = ofVec3f(0, 0, 0);
-			}
-		}
-	}
-
-
+	//Update all physical interactions in the scene
+	updatePhysics();
 }
 
 //--------------------------------------------------------------
@@ -289,7 +345,7 @@ void Renderer::draw() {
 		drawModel(model);
 	}
 
-	//GUI
+	//Draw the GUI
 	main_panel.draw();
 	if (current_demo == PLANETS) {
 		new_planet_panel.draw();
@@ -298,7 +354,7 @@ void Renderer::draw() {
 		new_model_panel.draw();
 	}
 
-	// OSD - Display frame rate, frame time, camera position/rotation, field of view, and the local basis vectors
+	// Draw the OSD - Display frame rate, frame time, camera position/rotation, field of view, and the local basis vectors
 	if (osd_toggle) {
 		ofSetColor(ofColor::white);
 		std::stringstream string_stream;
@@ -321,53 +377,6 @@ void Renderer::draw() {
 		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 60));
 		string_stream.str("");
 	}
-}
-
-//////////////////////////////// GUI BUTTON PRESSES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-void Renderer::initPlanetsDemo() {
-	//Clear models and add demo planet set
-	current_demo = PLANETS;
-	clearScene();
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::white, 100, ofVec3f(10, 0, 0), ofVec3f(0, 5, 0), ofVec3f(0.5, -0.5, 0.5), 0.1)); /* "Planet" */
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::green, 200, ofVec3f(0, 0, 8), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.12)); /* "Planet" */
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::blue, 150, ofVec3f(6, 0, 6), ofVec3f(0, -5, 0), ofVec3f(-0.5, -0.5, 0.5), 0.2)); /* "Planet" */
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::red, 100, ofVec3f(0, 0, -10), ofVec3f(4, 0, 0), ofVec3f(-0.5, -0.5, 0.5), 0.1)); /* "Planet" */
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
-}
-
-void Renderer::initModelsDemo() {
-	//Clear models and add demo models set
-	current_demo = MODELS;
-	clearScene();
-	scene_models.push_back(new Model3D("..\\models\\teapot.obj", ofColor::white, ofVec3f(1, 0, 0), 0.4));
-	scene_models.push_back(new Model3D("..\\models\\cube.obj", ofColor::green, ofVec3f(-1, 0, 0), 1));
-
-}
-
-
-void Renderer::createNewPlanet() {
-	if (scene_models.size() < MAX_MODEL_COUNT) {
-		scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", (ofColor)new_planet_color, (float)new_planet_mass, (ofVec3f)new_planet_pos, (ofVec3f)new_planet_vel, ofVec3f(), (float)new_planet_size));
-	}
-	else {
-		//Somehow warn the user that they're at the limit
-	}
-}
-
-void Renderer::deletePlanets() {
-	//Clear the scene, then add the sun back
-	clearScene();
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
-}
-
-void Renderer::createNewModel() {
-	//https://openframeworks.cc/documentation/utils/ofSystemUtils/#show_ofSystemLoadDialog
-	ofFileDialogResult read_file = ofSystemLoadDialog("Choose File");
-	if (read_file.bSuccess) {
-		scene_models.push_back(new Model3D(read_file.getPath(), (ofColor)new_model_color, (ofVec3f)new_model_pos, (float)new_model_size));
-	}
-
 }
 
 //--------------------------------------------------------------

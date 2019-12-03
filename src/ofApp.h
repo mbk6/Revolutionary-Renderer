@@ -52,8 +52,8 @@ private:
 	float frame_time = 0;						/* frametime in seconds, updated with every call of the update() method */
 	bool edit_mode = false;						/* indicates whether the program is in edit-mode*/
 	std::vector<Model3D*> scene_models;			/* Collection of models in the scene */
-	const int MAX_MODEL_COUNT = 10;
-	DemoMode current_demo = NONE;
+	const int MAX_MODEL_COUNT = 10;				/* The maximum number of models allowed in the scene */
+	DemoMode current_demo = NONE;				/* The current demo mode */
 		
 	// Edit Mode parameters
 	Model3D* edit_mode_model = nullptr;			/* the current model being edited in edit-mode */
@@ -63,7 +63,7 @@ private:
 	float edit_rotation_speed = 0.01;			/* Speed at which objects can be rotated with in edit mode (unsure of units) */
 
 	// Walk mode parameters
-	float floor_height = -1;						/* y coordinate of the floor */
+	float floor_height = -1;					/* y coordinate of the floor */
 	float player_height = 1;					/* height from the camera to the floor when standing on the floor */
 	float jump_speed = 5;						/* speed the user can jump */
 	ofVec3f cam_velocity = ofVec3f(0, 0, 0);	/* current velocity of the camera */
@@ -98,7 +98,7 @@ private:
 
 public:
     
-	/* Constructor passes in window size */
+	/* Constructor */
     Renderer(int width, int height);
 
 	//////////////////// RENDERER METHODS \\\\\\\\\\\\\\\\\\\\\
@@ -108,6 +108,12 @@ public:
 
 	/* Rotates two coordinates by a given angle */
 	void rotateCoords(float& coord1, float& coord2, float& angle);
+
+	/* Updates the camera position and rotation based on user controls */
+	void updateCamera();
+
+	/* Updates all physical interactions between objects in the scene */
+	void updatePhysics();
 
 	/* Returns whether an ofVec2f is in the bounds of the screen */
 	bool inBounds(ofVec2f point2d);
