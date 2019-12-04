@@ -13,6 +13,7 @@
 * 11/30/19 - Added extra toggles to the main GUI panel, and added the Models Demo, where the user can add new models to the scene.
 * 11/31/19 - Began writing tests for the Renderer and Model3D objects.
 * 12/2/19 - Added OBJ importing using a file dialog,  wrote more tests.
+* 12/3/19 - Added Mirror Mode, using head tracking to move a wireframe head like the user's reflection.
 
 **Upcoming:**
 
