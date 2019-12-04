@@ -13,7 +13,6 @@ bool nearlyEquivalent(float num0, float num1) {
 	return (difference <= 0.000001);
 }
 
-
 TEST_CASE("Test ofVec2f transform(ofVec3f point3d)") {
 	ofVec2f out_of_bounds_point = ofVec2f(-1 * (test_width * 0.25) - 1, -1 * (test_height * 0.25) - 1);
 	
@@ -93,4 +92,3 @@ TEST_CASE("void computeLocalBasis()") {
 TEST_CASE("void clearScene()") {
 	// scene_models is private!
 }
-
