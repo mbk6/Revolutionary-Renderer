@@ -209,6 +209,41 @@ void Renderer::clearScene() {
 	scene_models.clear();
 }
 
+void Renderer::updateHead() {
+	for (int i = 0; i < face_finder.size(); i++) {
+		
+		//Use the velocity of a tracked face to move the head reflection left, right, up, and down
+		//Use changes in the area of the rectangle returned by the object finder to move the reflection forward and backward
+		
+		
+		float areaDiff;
+
+		if (last_area < 0) {
+			areaDiff = 0;
+		}
+		else {
+			areaDiff = face_finder.getObject(i).getArea() - last_area;
+		}
+
+		last_area = face_finder.getObject(i).getArea();
+
+		ofVec2f face_vel = ofxCv::toOf(face_finder.getVelocity(i));
+
+		//Only move the head if the velocities are significant enough
+		if (face_vel.length() > 4) {
+			face_vel.x *= -1;
+			face_vel.y *= -1;
+			ofDrawLine(win_center, win_center + face_vel);
+
+			head.position += (face_vel.x * local_basis[1] + face_vel.y * local_basis[2]) * frame_time;
+
+		}
+		if (std::abs(areaDiff) > 4) {
+			head.position += areaDiff * local_basis[0] * frame_time * -0.01;
+		}
+	}
+}
+
 Renderer::Renderer(int width, int height) {
 	win_width = width;
     win_height = height;
@@ -243,6 +278,11 @@ void Renderer::initModelsDemo() {
 
 }
 
+void Renderer::initMirrorDemo() {
+	current_demo = MIRROR;
+	clearScene();
+}
+
 void Renderer::createNewPlanet() {
 	if (scene_models.size() < MAX_MODEL_COUNT) {
 		scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", (ofColor)new_planet_color, (float)new_planet_mass, (ofVec3f)new_planet_pos, (ofVec3f)new_planet_vel, ofVec3f(), (float)new_planet_size));
@@ -272,9 +312,13 @@ void Renderer::createNewModel() {
 //--------------------------------------------------------------
 void Renderer::setup() {
 		
-	webcam.setup(200, 200);
+	webcam.setup(600, 600);
 
-
+	//Face tracking code based on examples provided with ofxCv
+	face_finder.setup("haarcascade_frontalface_default.xml");
+	face_finder.setPreset(ofxCv::ObjectFinder::Fast);
+	face_finder.getTracker().setSmoothingRate(.8);
+	
 
 
 	ofSetBackgroundColor(ofColor::black);
@@ -290,6 +334,7 @@ void Renderer::setup() {
 	main_panel.add(demos_label.setup("Demos", ""));
 	main_panel.add(planets_demo_button.setup("Planets"));
 	main_panel.add(models_demo_button.setup("Models"));
+	main_panel.add(mirror_demo_button.setup("Mirror"));
 
 	//New Planet Panel
 	new_planet_panel.setup();
@@ -316,6 +361,7 @@ void Renderer::setup() {
 	//Button Listeners
 	planets_demo_button.addListener(this, &Renderer::initPlanetsDemo);
 	models_demo_button.addListener(this, &Renderer::initModelsDemo);
+	mirror_demo_button.addListener(this, &Renderer::initMirrorDemo);
 	create_planet_button.addListener(this, &Renderer::createNewPlanet);
 	delete_planets_button.addListener(this, &Renderer::deletePlanets);
 	create_model_button.addListener(this, &Renderer::createNewModel);
@@ -337,11 +383,13 @@ void Renderer::update(){
 	//Update all physical interactions in the scene
 	updatePhysics();
 
-	webcam.update();
-	myTexture.allocate(webcam.getPixels());
-
-
-	//webcam_image.warpPerspective(ofPoint(0, 0), ofPoint(250, 0), ofPoint(200, 200), ofPoint(0, 250));
+	if (current_demo == MIRROR) {
+		webcam.update();
+		if (webcam.isFrameNew()) {
+			face_finder.update(webcam);
+		}
+		updateHead();
+	}
 }
 
 //--------------------------------------------------------------
@@ -390,7 +438,9 @@ void Renderer::draw() {
 	}
 
 
-	myTexture.draw((ofPoint)transform(ofVec3f(-1, 0, 0)), (ofPoint)transform(ofVec3f(-1, 2, 0)), (ofPoint)transform(ofVec3f(1, 2, 0)), (ofPoint)transform(ofVec3f(1, 0, 0)));
+	if (current_demo == MIRROR) {
+		drawModel(&head);
+	}
 
 }
 

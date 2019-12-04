@@ -3,6 +3,8 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 #include "ofxOpenCv.h"
+#include "ofxCv.h"
+
 #include "physics_body.h"
 
 #include <vector>
@@ -25,6 +27,7 @@ private:
 	ofxLabel demos_label;
 	ofxButton planets_demo_button;
 	ofxButton models_demo_button;
+	ofxButton mirror_demo_button;
 
 	//New planet panel
 	ofxPanel new_planet_panel;
@@ -46,8 +49,18 @@ private:
 	
 
 	enum DemoMode {
-		NONE, PLANETS, MODELS
+		NONE, PLANETS, MODELS, MIRROR
 	};
+
+
+
+
+	ofVideoGrabber webcam;						/* Videograbber object used for webcam input */
+	ofxCv::ObjectFinder face_finder;			/* Object used to find and track faces */
+	Model3D head = Model3D("..\\models\\head.obj", ofColor::white, ofVec3f(), 20);	/* The "reflection" head used in mirror mode */
+	float last_area = -1;						/* The area of the tracking rectangle used to calculate changes in face distance */
+
+
 
 	// Application parameters
 	float frame_time = 0;						/* frametime in seconds, updated with every call of the update() method */
@@ -56,10 +69,6 @@ private:
 	const int MAX_MODEL_COUNT = 10;				/* The maximum number of models allowed in the scene */
 	DemoMode current_demo = NONE;				/* The current demo mode */
 
-	ofxCvColorImage webcam_image;
-	ofVideoGrabber webcam;						/* Videograbber object used for webcam input */
-	ofTexture myTexture;
-		
 	// Edit Mode parameters
 	Model3D* edit_mode_model = nullptr;			/* the current model being edited in edit-mode */
 	float edit_mode_model_dist = 0;				/* the distance from the camera to the chosen model at the time it was chosen */
@@ -134,10 +143,14 @@ public:
 	/* Clears the scene_models vector and deletes all objects in it */
 	void clearScene();
 
+	/* Updates the position of the head reflection in mirror mode */
+	void updateHead();
+
 	//////////////////// GUI BUTTON PRESSES \\\\\\\\\\\\\\\\\
 
 	void initPlanetsDemo();
 	void initModelsDemo();
+	void initMirrorDemo();
 	void createNewPlanet();
 	void deletePlanets();
 	void createNewModel();
