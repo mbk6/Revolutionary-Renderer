@@ -6,6 +6,7 @@
 #include "ofxCv.h"
 
 #include "physics_body.h"
+#include "camera.h"
 
 #include <vector>
 #include <sstream>
@@ -60,7 +61,7 @@ private:
 	float last_area = -1;						/* The area of the tracking rectangle used to calculate changes in face distance */
 	ofRectangle face_rect = ofRectangle(-10, -10, 0, 0);
 
-
+	Camera camera;
 
 	// Application parameters
 	float frame_time = 0;						/* frametime in seconds, updated with every call of the update() method */
@@ -89,21 +90,10 @@ private:
 	// Window parameters
 	int win_width;								/* width of the screen */
 	int win_height;								/* height of the screen */
-	int win_margin[2];							/* The amount of pixels outside width and height of the screen where lines will still be drawn */
-	ofVec2f win_center;							/* center of the screen */
 	ofVec2f last_mouse_pos = ofVec2f(-1, -1);	/* last recorded screen coordinates of the mouse */
-	ofVec2f out_of_bounds_point;				/* Point to return if intended not to be drawn on the screen */
 
 
-	// Camera parameters
-	ofVec3f cam_pos = ofVec3f(0, 0, 5);			/* World coordinates of the camera */
-	ofVec2f cam_rot = ofVec2f(0, 0);			/* The horizontal and vertical rotation of the camera in radians */
-	float max_vertical_angle = 1.5;				/* The maximum angle magnitude the user can look up or down */
-	float move_speed = 3;						/* Speed of camera movement units per second */
-	float turn_speed = 1;						/* Speed of camera rotation in radians per second */
-	float mouse_sensitivity = 0.5;				/* Speed of camera roation when controlled by mouse. Proportional to radians per second (I think) */
-	float field_of_view = 600;					/* Controls the camera's field of view (unknown units, maybe proportional to 1 / radians?) */
-	ofVec3f local_basis[3];						/* Defines unit vectors pointing forward, right, and up respectively. Updated every time the camera turns and when entering edit mode */
+
 
 
 	// Controls - keys that are held down are represented by booleans turned on and off as they are pressed/released
@@ -119,26 +109,13 @@ public:
 
 	//////////////////// RENDERER METHODS \\\\\\\\\\\\\\\\\\\\\
 
-	/* Transforms a point in 3d space to a 2d screen coordinate */
-	ofVec2f transform(ofVec3f point3d);
 
-	/* Rotates two coordinates by a given angle */
-	void rotateCoords(float& coord0, float& coord1, float angle);
 
 	/* Updates the camera position and rotation based on user controls */
 	void updateCamera();
 
 	/* Updates all physical interactions between objects in the scene */
 	void updatePhysics();
-
-	/* Returns whether an ofVec2f is in the bounds of the screen */
-	bool inBounds(ofVec2f point2d);
-
-	/* Draws 3D Model on the screen */
-	void drawModel(Model3D* model);
-
-	/* Computes a set of three vectors representing a local basis of the current camera position */
-	void computeLocalBasis();
 
 	/* Clears the scene_models vector and deletes all objects in it */
 	void clearScene();
