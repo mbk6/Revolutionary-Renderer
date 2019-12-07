@@ -24,10 +24,10 @@ private:
 	ofxToggle walk_mode_toggle;
 	ofxToggle osd_toggle;
 	ofxToggle floor_toggle;
+	ofxToggle head_control_toggle;
 	ofxLabel demos_label;
 	ofxButton planets_demo_button;
 	ofxButton models_demo_button;
-	ofxButton mirror_demo_button;
 
 	//New planet panel
 	ofxPanel new_planet_panel;
@@ -49,7 +49,7 @@ private:
 	
 
 	enum DemoMode {
-		NONE, PLANETS, MODELS, MIRROR
+		NONE, PLANETS, MODELS
 	};
 
 
@@ -57,8 +57,8 @@ private:
 
 	ofVideoGrabber webcam;						/* Videograbber object used for webcam input */
 	ofxCv::ObjectFinder face_finder;			/* Object used to find and track faces */
-	Model3D head = Model3D("..\\models\\head.obj", ofColor::white, ofVec3f(), 20);	/* The "reflection" head used in mirror mode */
 	float last_area = -1;						/* The area of the tracking rectangle used to calculate changes in face distance */
+	ofRectangle face_rect = ofRectangle(-10, -10, 0, 0);
 
 
 
@@ -143,14 +143,13 @@ public:
 	/* Clears the scene_models vector and deletes all objects in it */
 	void clearScene();
 
-	/* Updates the position of the head reflection in mirror mode */
+	/* Updates the position of the tracked head for head control */
 	void updateHead();
 
 	//////////////////// GUI BUTTON PRESSES \\\\\\\\\\\\\\\\\
 
 	void initPlanetsDemo();
 	void initModelsDemo();
-	void initMirrorDemo();
 	void createNewPlanet();
 	void deletePlanets();
 	void createNewModel();

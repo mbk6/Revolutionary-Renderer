@@ -215,32 +215,36 @@ void Renderer::updateHead() {
 		//Use the velocity of a tracked face to move the head reflection left, right, up, and down
 		//Use changes in the area of the rectangle returned by the object finder to move the reflection forward and backward
 		
-		
-		float areaDiff;
+	
 
-		if (last_area < 0) {
-			areaDiff = 0;
+		ofRectangle new_face_rect = face_finder.getObjectSmoothed(i);
+		ofSetColor(ofColor::white);
+		ofDrawRectangle(face_rect);
+
+		if (face_rect.x < 0) {
+			face_rect = new_face_rect;
+			return;
 		}
-		else {
-			areaDiff = face_finder.getObject(i).getArea() - last_area;
-		}
 
-		last_area = face_finder.getObject(i).getArea();
 
-		ofVec2f face_vel = ofxCv::toOf(face_finder.getVelocity(i));
+		float areaDiff = new_face_rect.getArea() - face_rect.getArea();
 
-		//Only move the head if the velocities are significant enough
-		if (face_vel.length() > 4) {
+		ofVec2f face_vel = (new_face_rect.position - face_rect.position) / frame_time;
+
+		if (face_vel.length() > 0) {
 			face_vel.x *= -1;
 			face_vel.y *= -1;
 			ofDrawLine(win_center, win_center + face_vel);
 
-			head.position += (face_vel.x * local_basis[1] + face_vel.y * local_basis[2]) * frame_time;
+			cam_pos += (face_vel.x * local_basis[1] + face_vel.y * local_basis[2]) * frame_time * 0.01;
 
 		}
-		if (std::abs(areaDiff) > 4) {
-			head.position += areaDiff * local_basis[0] * frame_time * -0.01;
+
+		if (std::abs(areaDiff) > 0) {
+			cam_pos += areaDiff * local_basis[0] * frame_time * 0.005;
 		}
+
+		face_rect = new_face_rect;
 	}
 }
 
@@ -278,11 +282,6 @@ void Renderer::initModelsDemo() {
 
 }
 
-void Renderer::initMirrorDemo() {
-	current_demo = MIRROR;
-	clearScene();
-}
-
 void Renderer::createNewPlanet() {
 	if (scene_models.size() < MAX_MODEL_COUNT) {
 		scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", (ofColor)new_planet_color, (float)new_planet_mass, (ofVec3f)new_planet_pos, (ofVec3f)new_planet_vel, ofVec3f(), (float)new_planet_size));
@@ -312,12 +311,12 @@ void Renderer::createNewModel() {
 //--------------------------------------------------------------
 void Renderer::setup() {
 		
-	webcam.setup(600, 600);
+	webcam.setup(1024, 576);
 
 	//Face tracking code based on examples provided with ofxCv
 	face_finder.setup("haarcascade_frontalface_default.xml");
 	face_finder.setPreset(ofxCv::ObjectFinder::Fast);
-	face_finder.getTracker().setSmoothingRate(.8);
+	face_finder.getTracker().setSmoothingRate(.2);
 	
 
 
@@ -331,10 +330,10 @@ void Renderer::setup() {
 	main_panel.add(walk_mode_toggle.setup("Walk Mode", false));
 	main_panel.add(osd_toggle.setup("Show OSD", false));
 	main_panel.add(floor_toggle.setup("Show floor", false));
+	main_panel.add(head_control_toggle.setup("Head Control", false));
 	main_panel.add(demos_label.setup("Demos", ""));
 	main_panel.add(planets_demo_button.setup("Planets"));
 	main_panel.add(models_demo_button.setup("Models"));
-	main_panel.add(mirror_demo_button.setup("Mirror"));
 
 	//New Planet Panel
 	new_planet_panel.setup();
@@ -361,7 +360,6 @@ void Renderer::setup() {
 	//Button Listeners
 	planets_demo_button.addListener(this, &Renderer::initPlanetsDemo);
 	models_demo_button.addListener(this, &Renderer::initModelsDemo);
-	mirror_demo_button.addListener(this, &Renderer::initMirrorDemo);
 	create_planet_button.addListener(this, &Renderer::createNewPlanet);
 	delete_planets_button.addListener(this, &Renderer::deletePlanets);
 	create_model_button.addListener(this, &Renderer::createNewModel);
@@ -383,7 +381,7 @@ void Renderer::update(){
 	//Update all physical interactions in the scene
 	updatePhysics();
 
-	if (current_demo == MIRROR) {
+	if (head_control_toggle) {
 		webcam.update();
 		if (webcam.isFrameNew()) {
 			face_finder.update(webcam);
@@ -435,11 +433,6 @@ void Renderer::draw() {
 		string_stream << "local_basis: (" << local_basis[0].x << ", " << local_basis[0].y << ", " << local_basis[0].z << "), (" << local_basis[1].x << ", " << local_basis[1].y << ", " << local_basis[1].z << "), (" << local_basis[2].x << ", " << local_basis[2].y << ", " << local_basis[2].z << ")";
 		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 60));
 		string_stream.str("");
-	}
-
-
-	if (current_demo == MIRROR) {
-		drawModel(&head);
 	}
 
 }
