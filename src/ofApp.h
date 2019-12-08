@@ -35,7 +35,7 @@ private:
 	ofxColorSlider new_planet_color;
 	ofxVec3Slider new_planet_pos;
 	ofxVec3Slider new_planet_vel;
-	ofxFloatField new_planet_mass;
+	ofxFloatSlider new_planet_mass;
 	ofxFloatSlider new_planet_size;
 	ofxButton create_planet_button;
 	ofxButton delete_planets_button;

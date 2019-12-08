@@ -86,20 +86,21 @@ void Renderer::updatePhysics() {
 
 	//If the frame time is too large, don't update anything
 	if (frame_time <= 1) {
+
 		//Exert gravity between every two PhysicsBodies in the scene
-		for (Model3D* model0 : scene_models) {
-			//Dynamic cast method from https://stackoverflow.com/questions/27595076/instanceof-equivalent-in-c?rq=1
-			if (PhysicsBody* body0 = dynamic_cast<PhysicsBody*>(model0)) {
-				for (Model3D* model1 : scene_models) {
-					if (PhysicsBody* body1 = dynamic_cast<PhysicsBody*>(model1)) {
-						if (body0 != body1) {
+		if (scene_models.size() > 0) {
+			for (int i = 0; i < scene_models.size() - 1; i++) {
+				if (PhysicsBody* body0 = dynamic_cast<PhysicsBody*>(scene_models[i])) {
+					for (int j = i + 1; j < scene_models.size(); j++) {
+						if (PhysicsBody* body1 = dynamic_cast<PhysicsBody*>(scene_models[j])) {
 							body0->exertGravity(*body1);
+							body0->collideWith(*body1);
 						}
 					}
 				}
 			}
-
 		}
+		
 
 		//Update and reset all force vectors
 		for (Model3D* model : scene_models) {
@@ -248,7 +249,7 @@ void Renderer::setup() {
 	new_planet_panel.add(new_planet_color.setup("Color", ofColor::green, ofColor::black, ofColor::white));
 	new_planet_panel.add(new_planet_pos.setup("Position", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
 	new_planet_panel.add(new_planet_vel.setup("Velocity", ofVec3f(), ofVec3f(-10, -10, -10), ofVec3f(10, 10, 10)));
-	new_planet_panel.add(new_planet_mass.setup("Mass", 100));
+	new_planet_panel.add(new_planet_mass.setup("Mass:", 100, 100, 100000));
 	new_planet_panel.add(new_planet_size.setup(0.1));
 	new_planet_panel.add(create_planet_button.setup("Create Planet"));
 	new_planet_panel.add(delete_planets_button.setup("Remove All"));

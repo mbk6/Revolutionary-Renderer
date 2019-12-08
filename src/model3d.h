@@ -31,5 +31,4 @@ public:
 	
 	/* Rotates the entire model about a given axis by an angle given by the magnitude of that axis */
 	void rotate(ofVec3f rotation_vector);
-
 };
