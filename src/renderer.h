@@ -1,11 +1,13 @@
+// RENDERER - Defines the core of the 3d wireframe renderer and its demonstration modes
+
 #pragma once
 
 #include "ofMain.h"
 #include "ofxGui.h"
 #include "ofxOpenCv.h"
-#include "ofxCv.h"
+#include "ofxCv.h"			/* ofxCv and ofxOpenCv external libraries used for the head-controlled camera feature */
 
-#include "physics_body.h"
+#include "physics_body.h"	/* Also includes model3d.h */
 #include "plane.h"
 #include "camera.h"
 
@@ -21,7 +23,7 @@ private:
 
 	////// GUI \\\\\\\
 	
-	//Main
+	//Main Panel - Contains toggles for various features, and lets the user choose a demo
 	ofxPanel main_panel;
 	ofxToggle walk_mode_toggle;
 	ofxToggle osd_toggle;
@@ -32,7 +34,7 @@ private:
 	ofxButton models_demo_button;
 	ofxButton box_demo_button;
 
-	//New planet panel
+	//New planet panel - Provides interface for creating and removing planets in the PLANETS demo
 	ofxPanel new_planet_panel;
 	ofxColorSlider new_planet_color;
 	ofxVec3Slider new_planet_pos;
@@ -42,7 +44,7 @@ private:
 	ofxButton create_planet_button;
 	ofxButton delete_planets_button;
 
-	//New model panel
+	//New model panel - Provides interface for creating and removing models in the MODELS demo
 	ofxPanel new_model_panel;
 	ofxColorSlider new_model_color;
 	ofxVec3Slider new_model_pos;
@@ -50,37 +52,32 @@ private:
 	ofxButton create_model_button;
 	ofxButton delete_models_button;
 
-	//Box panel
+	//Box panel - Provides interface for modifying parameters of the bod in the BOX demo
 	ofxPanel box_panel;
 	ofxIntSlider box_size_slider;
 	ofxIntSlider num_balls_slider;
 	ofxButton box_run_button;
 	
-
+	//Enumerator representing the current demo mode
 	enum DemoMode {
 		NONE, PLANETS, MODELS, BOX
 	};
 
 
-
-
-
-	ofVideoGrabber webcam;						/* Videograbber object used for webcam input */
-	ofxCv::ObjectFinder face_finder;			/* Object used to find and track faces */
-	float last_area = -1;						/* The area of the tracking rectangle used to calculate changes in face distance */
-	ofRectangle face_rect = ofRectangle(-10, -10, 0, 0);
-
-	Camera camera;
+	// Head-control parameters		
+	ofVideoGrabber webcam;									/* Videograbber object used for webcam input */
+	ofxCv::ObjectFinder face_finder;						/* ObjectFinder used to find and track faces */
+	ofRectangle face_rect = ofRectangle(-10, -10, 0, 0);	/* The current record of the rectangle surrounding the user's face */
 
 	// Application parameters
 	float frame_time = 0;						/* frametime in seconds, updated with every call of the update() method */
-	bool edit_mode = false;						/* indicates whether the program is in edit-mode*/
-	std::vector<Model3D*> scene_models;			/* Collection of models in the scene */
+	bool edit_mode = false;						/* indicates whether the user is currently manipulating objects in the scene */
+	std::vector<Model3D*> scene_models;			/* Collection of all models in the scene */
 	const int MAX_MODEL_COUNT = 10;				/* The maximum number of models allowed in the scene */
 	DemoMode current_demo = NONE;				/* The current demo mode */
 
 	// Edit Mode parameters
-	Model3D* edit_mode_model = nullptr;			/* the current model being edited in edit-mode */
+	Model3D* edit_mode_model = nullptr;			/* the current model being manipulated in edit-mode */
 	float edit_mode_model_dist = 0;				/* the distance from the camera to the chosen model at the time it was chosen */
 	int grab_range = 200;						/* the distance the mouse needs to be from the center of an object in order to move it in edit mode */
 	float edit_translation_speed = 0.002;		/* Speed at which objects can be moved with in edit mode (unsure of units) */
@@ -90,35 +87,30 @@ private:
 	float floor_height = -1;					/* y coordinate of the floor */
 	float player_height = 1;					/* height from the camera to the floor when standing on the floor */
 	float jump_speed = 5;						/* speed the user can jump */
-	ofVec3f cam_velocity = ofVec3f(0, 0, 0);	/* current velocity of the camera */
-	ofVec3f gravity = ofVec3f(0, -10, 0);		/* gravity vector (units/sec) */
+	ofVec3f cam_velocity = ofVec3f(0, 0, 0);	/* current velocity of the camera (units/sec) */
+	ofVec3f gravity = ofVec3f(0, -10, 0);		/* gravity vector (units/sec/sec) */
 
 	//Standard Scene Objects
-	//Model3D floor = Model3D("..\\models\\plane_50x50.obj", ofColor::gray, ofVec3f(0, floor_height, 0), 1.0f);
-	Plane floor = Plane(ofVec3f(0, floor_height, 0), ofVec3f(0, 1, 0), ofColor::gray, 50);
+	Plane floor = Plane(ofVec3f(0, floor_height, 0), ofVec3f(0, 1, 0), ofColor::gray, 30);	/* The plane shown when "Show Floor" is enabled */
 
 	// Window parameters
 	int win_width;								/* width of the screen */
 	int win_height;								/* height of the screen */
+	Camera camera;								/* Camera object used to view the scene and draw to the screen */
 	ofVec2f last_mouse_pos = ofVec2f(-1, -1);	/* last recorded screen coordinates of the mouse */
 
 
-
-
-
-	// Controls - keys that are held down are represented by booleans turned on and off as they are pressed/released
+	// Movement Controls - keys that are held down are represented by booleans turned on and off as they are pressed/released
 	//						    w      s      a      d    space  shift   up	   down   left   right
 	bool pressed_keys[10] = { false, false, false, false, false, false, false, false, false, false };
 
 
-
 public:
     
-	/* Constructor */
-    Renderer(int width, int height);
-
 	//////////////////// RENDERER METHODS \\\\\\\\\\\\\\\\\\\\\
 
+	/* Renderer Constructor */
+    Renderer(int width, int height);
 
 	/* Updates the camera position and rotation based on user controls */
 	void updateCamera();
@@ -129,20 +121,22 @@ public:
 	/* Clears the scene_models vector and deletes all objects in it */
 	void clearScene();
 
-	/* Updates the position of the tracked head for head control */
+	/* Updates the position of the camera for head control */
 	void updateHead();
 
 	//////////////////// GUI BUTTON PRESSES \\\\\\\\\\\\\\\\\
 
-	void initPlanetsDemo();
-	void initModelsDemo();
-	void initBoxDemo();
-	void createNewPlanet();
-	void deletePlanets();
-	void createNewModel();
+	// Demo initializers
+	void initPlanetsDemo(); /* Puts a "sun" at the origin with high mass, and a demo set of planets orbiting it */
+	void initModelsDemo();  /* Generates three models rendered at once to show off the power of the program */
+	void initBoxDemo();		/* Generates a medium-sized box for the box demo */
+	// Demo modifiers
+	void createNewPlanet(); /* Creates a new planet using parameters from the planet creator panel */
+	void deletePlanets();	/* Removes all planets except for the "sun" */
+	void createNewModel();	/* Creates a new model using parameters from the model creator panel */
 
 
-	//////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
+	//////////////////// AUTOGENERATED OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
     
 	void setup();
 	void update();

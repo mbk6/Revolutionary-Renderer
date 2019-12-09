@@ -1,18 +1,19 @@
-#include "ofApp.h"
+#include "renderer.h"
 
-
+/////////////// RENDERER METHODS \\\\\\\\\\\\\\\\\
 
 void Renderer::updateCamera() {
 	/*
 	Movement System:
 	Standard WSAD/SHIFT/SPACE movement relative to current view direction.
 	wsad will only adjust the camera's x and z coordinates, while space and shift will move it only in the y direction.
-	Check the corresponding element of pressed_keys to see if a key is currently pressed.
+	Check the corresponding element of the pressed_keys array to see if a key is currently pressed.
 	Use the local basis to deterimine which way to move, and update it whenever the camera turns.
 	*/
 
-	//Generate unit vector in direction of camera position, with only x and z components. Start with an empty vector
+	//Generate unit vector in direction of camera position, with only x and z components. Start with an empty 3D vector
 	ofVec3f move_direction = ofVec3f(0, 0, 0);
+	//Generate a vector representing the direction of camera rotation. Start with an empty 2D vector
 	ofVec2f rotation_change = ofVec2f(0, 0);
 
 	// W
@@ -33,7 +34,8 @@ void Renderer::updateCamera() {
 	if (pressed_keys[3]) {
 		move_direction += camera.local_basis[1];
 	}
-	// Vertical movement does not depend on camera position. Vertical movement besides jumping is not enabled in walk mode
+
+	// Vertical movement does not depend on camera orientation. Vertical movement besides jumping is not enabled in walk mode
 	// SPACE
 	if (pressed_keys[4]) {
 		if (!walk_mode_toggle) {
@@ -75,6 +77,7 @@ void Renderer::updateCamera() {
 			cam_velocity += gravity * frame_time;
 			camera.update(cam_velocity, ofVec3f(), false, frame_time);
 		}
+		// If the camera is on the floor, keep it there
 		if (camera.position.y < floor_height + player_height) {
 			camera.position.y = floor_height + player_height;
 			cam_velocity.y = 0;
@@ -84,8 +87,8 @@ void Renderer::updateCamera() {
 
 void Renderer::updatePhysics() {
 
-	//If the frame time is too large, don't update anything
-	if (frame_time <= 1) {
+	//If the frame time is too large, don't update anything. This keeps large chaotic velocities from breaking the program
+	if (frame_time <= 0.2) {
 
 		
 		if (scene_models.size() > 0) {
@@ -114,13 +117,10 @@ void Renderer::updatePhysics() {
 			}
 		}
 
-
-
-
-		//Update and reset all force vectors
+		//Update bodies and reset all force vectors
 		for (Model3D* model : scene_models) {
-			//If in edit mode, don't move the object, so that it can still be "grabbed"
 			if (PhysicsBody* body = dynamic_cast<PhysicsBody*>(model)) {
+				//If in edit mode, don't move the object, so that it can still be "grabbed"
 				if (edit_mode_model != model) {
 					body->update(frame_time);
 				}
@@ -131,6 +131,7 @@ void Renderer::updatePhysics() {
 }
 
 void Renderer::clearScene() {
+	// Delete everything in scene_models
 	for (int i = 0; i < scene_models.size(); i++) {
 		delete scene_models[i];
 	}
@@ -138,39 +139,36 @@ void Renderer::clearScene() {
 }
 
 void Renderer::updateHead() {
-	for (int i = 0; i < face_finder.size(); i++) {
-		
-		//Use the velocity of a tracked face to move the head reflection left, right, up, and down
-		//Use changes in the area of the rectangle returned by the object finder to move the reflection forward and backward
-		
-	
 
-		ofRectangle new_face_rect = face_finder.getObjectSmoothed(i);
-		ofSetColor(ofColor::white);
-		ofDrawRectangle(face_rect);
+	//Only enable tracking if one face is present
+	if(face_finder.size() == 1) {
+		
+		//Use the velocity of a tracked face to move the camera left, right, up, and down
+		//Use changes in the area of the rectangle returned by the object finder to move the camera forward and backward
+		
+		ofRectangle new_face_rect = face_finder.getObjectSmoothed(0);
 
+		//If face_rect is its default value, skip the rest of this method, since it relies on the previously recorded face_rect
 		if (face_rect.x < 0) {
 			face_rect = new_face_rect;
 			return;
 		}
 
+		float area_difference = new_face_rect.getArea() - face_rect.getArea();
+		ofVec2f face_velocity = (new_face_rect.position - face_rect.position) / frame_time;
 
-		float areaDiff = new_face_rect.getArea() - face_rect.getArea();
-
-		ofVec2f face_vel = (new_face_rect.position - face_rect.position) / frame_time;
-
-		if (face_vel.length() > 0) {
-			face_vel.x *= -1;
-			face_vel.y *= -1;
-
-			camera.position += (face_vel.x * camera.local_basis[1] + face_vel.y * camera.local_basis[2]) * frame_time * 0.01;
-
+		//Only update the camera position if the change in face position is significant enough
+		if (face_velocity.length() > 1) {
+			face_velocity *= -1;
+			//Use the local basis to move the camera
+			camera.position += (face_velocity.x * camera.local_basis[1] + face_velocity.y * camera.local_basis[2]) * frame_time * 0.01;
+		}
+		if (std::abs(area_difference) > 1) {
+			//Use the local basis to move the camera
+			camera.position += area_difference * camera.local_basis[0] * frame_time * 0.005;
 		}
 
-		if (std::abs(areaDiff) > 0) {
-			camera.position += areaDiff * camera.local_basis[0] * frame_time * 0.005;
-		}
-
+		//Update the face rectangle record
 		face_rect = new_face_rect;
 	}
 }
@@ -198,20 +196,21 @@ void Renderer::initModelsDemo() {
 	//Clear models and add demo models set
 	current_demo = MODELS;
 	clearScene();
-	scene_models.push_back(new Model3D("..\\models\\pumpkin.obj", ofColor::orange, ofVec3f(1, 0, -2), 0.02));
-	scene_models.push_back(new Model3D("..\\models\\cow.obj", ofColor::white, ofVec3f(-1, 0, -2), 0.2));
+	scene_models.push_back(new Model3D("..\\models\\cow.obj", ofColor::white, ofVec3f(0, 0, -1), 0.2));
 	scene_models.push_back(new Model3D("..\\models\\teapot.obj", ofColor::lightBlue, ofVec3f(2, 0, 0), 0.4));
 	scene_models.push_back(new Model3D("..\\models\\cube.obj", ofColor::green, ofVec3f(-2, 0, 0), 1));
 
 }
 
 void Renderer::initBoxDemo() {
+	//Clear the scene and add the demo box configuration
 	current_demo = BOX;
 	clearScene();
 
+	//Where to put the walls depends on the size
 	int wall_offset = (box_size_slider+1) / 2;
 
-	//Add floor, walls and ceiling
+	//Add floor, walls, and ceiling
 	scene_models.push_back(new Plane(ofVec3f(0, -wall_offset, 0), ofVec3f(0, 1, 0), ofColor::gray, 2*((box_size_slider+1)/2) + 1));
 	scene_models.push_back(new Plane(ofVec3f(0, wall_offset, 0), ofVec3f(0, -1, 0), ofColor::gray, 2*((box_size_slider+1)/2) + 1));
 	scene_models.push_back(new Plane(ofVec3f(wall_offset, 0, 0), ofVec3f(-1, 0, 0), ofColor::gray, 2*((box_size_slider+1)/2) + 1));
@@ -220,93 +219,94 @@ void Renderer::initBoxDemo() {
 	scene_models.push_back(new Plane(ofVec3f(0, 0, -wall_offset), ofVec3f(0, 0, 1), ofColor::gray, 2*((box_size_slider+1)/2) + 1));
 
 
-	//Add random balls, no random velocities
+	//Add random balls with random velocities
 	
-	float pos_bound = 0.4 * box_size_slider;
-	float vel_bound = 1.5*pos_bound;
+	float pos_bound = 0.4 * box_size_slider; /* Possible positions depend on the size of the box */
+	float vel_bound = 1.5*pos_bound;		 /* Possible velocities depend on the size of the box */
 
-	std::vector<float> random_floats;
-	ofVec3f position;
-	ofVec3f velocity;
-	ofVec3f angular_vel;
-	ofColor color;
-	float mass;
-	float size;
+	ofVec3f new_ball_position;
+	ofVec3f new_ball_velocity;
+	ofVec3f new_ball_angular_vel;
+	ofColor new_ball_color;
+	float new_ball_mass;
+	float new_ball_size;
+	
 	for (int i = 0; i < num_balls_slider; i++) {
 
 	//Random float generation method from https://stackoverflow.com/questions/686353/random-float-number-generation
 
+		new_ball_position.x =  -pos_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*pos_bound)));
+		new_ball_position.y = -pos_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2 * pos_bound)));
+		new_ball_position.z = -pos_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2 * pos_bound)));
 		
+		new_ball_velocity.x = -vel_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*vel_bound)));
+		new_ball_velocity.y = -vel_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*vel_bound)));
+		new_ball_velocity.z = -vel_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*vel_bound)));
+		
+		new_ball_angular_vel.x = -2 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (4)));
+		new_ball_angular_vel.y = -2 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (4)));
+		new_ball_angular_vel.z = -2 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (4)));
+		
+		new_ball_color.r = 100 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (155)));
+		new_ball_color.g = 100 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (155)));
+		new_ball_color.b = 100 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (155)));
 
-		position.x =  -pos_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*pos_bound)));
-		position.y = -pos_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2 * pos_bound)));
-		position.z = -pos_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2 * pos_bound)));
-		
-		velocity.x = -vel_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*vel_bound)));
-		velocity.y = -vel_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*vel_bound)));
-		velocity.z = -vel_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*vel_bound)));
-		
-		angular_vel.x = -2 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (4)));
-		angular_vel.y = -2 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (4)));
-		angular_vel.z = -2 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (4)));
-		
-		color.r = 100 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (155)));
-		color.g = 100 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (155)));
-		color.b = 100 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (155)));
-
-		mass = 1 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (20)));
+		new_ball_mass = 1 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (20)));
 
 		//Size of balls depends on size of box
 		float size = (0.05 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.5)))) * box_size_slider / 20;
 
-		scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", color, mass, position, velocity, angular_vel, size));
+		scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", new_ball_color, new_ball_mass, new_ball_position, new_ball_velocity, new_ball_angular_vel, size));
 	}
 
 }
 
 void Renderer::createNewPlanet() {
+	//Create a new planet if there aren't too many already
 	if (scene_models.size() < MAX_MODEL_COUNT) {
 		scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", (ofColor)new_planet_color, (float)new_planet_mass, (ofVec3f)new_planet_pos, (ofVec3f)new_planet_vel, ofVec3f(), (float)new_planet_size));
-	}
-	else {
-		//Somehow warn the user that they're at the limit
 	}
 }
 
 void Renderer::deletePlanets() {
-	//Clear the scene, then add the sun back
+	//Clear the scene, then add the "sun" back
 	clearScene();
 	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 300000, ofVec3f(0, 0, 0), ofVec3f(0, 0, 0), ofVec3f(0, 1, 0), 0.2)); /* "Sun" */
 }
 
 void Renderer::createNewModel() {
-	//Based on instructions at https://openframeworks.cc/documentation/utils/ofSystemUtils/#show_ofSystemLoadDialog
-	ofFileDialogResult read_file = ofSystemLoadDialog("Choose File");
-	if (read_file.bSuccess) {
-		scene_models.push_back(new Model3D(read_file.getPath(), (ofColor)new_model_color, (ofVec3f)new_model_pos, (float)new_model_size));
+	//Create a new model with a file dialog if there aren't too many already
+	if (scene_models.size() < MAX_MODEL_COUNT) {
+		//Based on instructions at https://openframeworks.cc/documentation/utils/ofSystemUtils/#show_ofSystemLoadDialog
+		ofFileDialogResult read_file = ofSystemLoadDialog("Choose File");
+		if (read_file.bSuccess) {
+			scene_models.push_back(new Model3D(read_file.getPath(), (ofColor)new_model_color, (ofVec3f)new_model_pos, (float)new_model_size));
+		}
 	}
-
 }
 
 
-////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
+////////////////// AUTOGENERATED OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
 //--------------------------------------------------------------
 void Renderer::setup() {
 
 	//Seed random number generator
 	std::srand(static_cast <unsigned> (time(0)));
-		
+	
+	//Initialize the webcam
 	webcam.setup(1024, 576);
 
+	//Initialize th camera
 	camera = Camera(ofVec3f(0, 0, 5), ofVec2f(0, 0), 1.5f, 1.0f, 3.0f, 0.5f, 600.0f, win_width, win_height);
 
-	//Face tracking code based on examples provided with ofxCv
+	//Initialize the background
+	ofSetBackgroundColor(ofColor::black);
+
+	//Initialize the face tracker. Face tracking code based on examples provided with the ofxCv addon
 	face_finder.setup("haarcascade_frontalface_default.xml");
 	face_finder.setPreset(ofxCv::ObjectFinder::Fast);
 	face_finder.getTracker().setSmoothingRate(.2);
 	
-	ofSetBackgroundColor(ofColor::black);
-
 
 	//////SETUP GUI\\\\\\\\
 
@@ -364,7 +364,6 @@ void Renderer::setup() {
 	delete_models_button.addListener(this, &Renderer::clearScene);
 	box_run_button.addListener(this, &Renderer::initBoxDemo);
 
-
 }
 
 //--------------------------------------------------------------
@@ -379,6 +378,7 @@ void Renderer::update(){
 	//Update all physical interactions in the scene
 	updatePhysics();
 
+	//Update face tracking if its enabled
 	if (head_control_toggle) {
 		webcam.update();
 		if (webcam.isFrameNew()) {
@@ -390,7 +390,7 @@ void Renderer::update(){
 
 //--------------------------------------------------------------
 void Renderer::draw() { 
-	//Draw the floor
+	//Draw the floor if enabled
 	if (floor_toggle) {
 		camera.drawModel(&floor);
 	}
@@ -532,19 +532,19 @@ void Renderer::keyReleased(int key){
 
 //--------------------------------------------------------------
 void Renderer::mouseMoved(int x, int y ){
-	//Unused...for now
+	//Unused autogenerated method
 }
 
 //--------------------------------------------------------------
 void Renderer::mouseDragged(int x, int y, int button) {
 	// If left-click, change the camera rotation
 	if (button == 0) {
-		//ofHideCursor();
 		ofVec2f current_mouse_pos = ofVec2f(x, -y);
 
-		//Subtract the old mouse position from the current position, and update the old mouse position
+		//Turn the camera using the mouse movement
 		camera.update(ofVec3f(), (current_mouse_pos - last_mouse_pos), true, frame_time);
-	
+		
+		//Subtract the old mouse position from the current position, and update the old mouse position
 		last_mouse_pos = current_mouse_pos;
 	}
 
@@ -557,7 +557,7 @@ void Renderer::mouseDragged(int x, int y, int button) {
 			float mouse_dist;
 			for (Model3D* model : scene_models) {
 				// Compute the distance between the object's projected center and the mouse location, and
-				// Point edit_mode_model to the current closest model
+				// point edit_mode_model to the current closest model
 				mouse_dist = (ofVec2f(x, y) - camera.transform(model->position)).length();
 				//Divide the grab range by the object's distance, since a smaller looking object should have a smaller grab range
 				if (mouse_dist < grab_range / (camera.position - model->position).length() && edit_mode_model_dist < min_mouse_dist) {
@@ -565,9 +565,10 @@ void Renderer::mouseDragged(int x, int y, int button) {
 					min_mouse_dist = edit_mode_model_dist;
 				}
 			}
+			//Now edit_mode_model points to whatever object, if any, is within grab range and whose projected center is closest to the mouse.
 			if (edit_mode_model != nullptr) {
 				// Enter edit mode, set the last mouse position to the current mouse position,
-				// calculate the distance from the camera to the selected model, and update the local basis
+				// calculate the distance from the camera to the selected model
 				edit_mode = true;
 				last_mouse_pos = ofVec2f(x, -y);
 				edit_mode_model_dist = (camera.position - edit_mode_model->position).length();
@@ -577,17 +578,17 @@ void Renderer::mouseDragged(int x, int y, int button) {
 				return;
 			}
 		}
-		// Hide the mouse, compute how much it has moved, and move the object by a scale of the local basis vectors
-		// How much the object should move should increase with its distance from the camera, to preserve
+		// Hide the mouse, compute how much it has moved, and move the object by a scale of the local basis vectors determined 
+		// using that movement. How much the object moves with the mouse should increase with its distance from the camera, to preserve 
 		// the illusion that it's being dragged across the flat screen
 		ofHideCursor();
 		ofVec2f current_mouse_pos = ofVec2f(x, -y);
 		ofVec2f mouse_difference = current_mouse_pos - last_mouse_pos;
 		ofVec3f position_change = (mouse_difference.x * camera.local_basis[1] + mouse_difference.y * camera.local_basis[2]) * edit_mode_model_dist * edit_translation_speed;
 		edit_mode_model->position += position_change;
-		//If the model is a PhysicsBody, give it the velocity of the mouse
+		//If the model is a PhysicsBody, give it the velocity determined by the mouse
 		if (PhysicsBody* body = dynamic_cast<PhysicsBody*>(edit_mode_model)) {
-			//Only control the body's velocity with the mouse if it's large enough
+			//...But only control the body's velocity with the mouse if it's large enough, otherwise set it to zero
 			if ((last_mouse_pos - current_mouse_pos).length() > 1) {
 				body->velocity = position_change / frame_time;
 			}
@@ -623,7 +624,7 @@ void Renderer::mousePressed(int x, int y, int button){
 //--------------------------------------------------------------
 void Renderer::mouseReleased(int x, int y, int button) {
 	
-	//Stay in edit mode if the middle button was just released. Otherwise, show the cursor and exit edit mode
+	//Stay in edit mode if the middle button was just released. If right-click is released, show the cursor and exit edit mode
 	if (button != 1) {
 	ofShowCursor();
 
@@ -648,25 +649,25 @@ void Renderer::mouseScrolled(ofMouseEventArgs& mouse) {
 
 //--------------------------------------------------------------
 void Renderer::mouseEntered(int x, int y){
-	//Unused...for now
+	//Unused autogenerated method
 }
 
 //--------------------------------------------------------------
 void Renderer::mouseExited(int x, int y){
-	//Unused...for now
+	//Unused autogenerated method
 }
 
 //--------------------------------------------------------------
 void Renderer::windowResized(int w, int h){
-	//Unused...for now
+	//Unused autogenerated method
 }
 
 //--------------------------------------------------------------
 void Renderer::gotMessage(ofMessage msg){
-	//Unused...for now
+	//Unused autogenerated method
 }
 
 //--------------------------------------------------------------
 void Renderer::dragEvent(ofDragInfo dragInfo){ 
-	//Unused...for now
+	//Unused autogenerated method
 }

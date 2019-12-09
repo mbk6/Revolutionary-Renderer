@@ -1,3 +1,5 @@
+// MODEL3D - Defines the Model3D class - for storing state and behavior for all 3D wireframe objects
+
 #pragma once
 #include <fstream>
 
@@ -19,17 +21,21 @@ protected:
 	void rotateVector(ofVec3f &vector, ofVec3f rotation_vector);
 
 public:
+
+	//Default Model3D constructor
 	Model3D();
+
+	//Model3D constructor
 	Model3D(std::string obj_path_, ofColor color_, ofVec3f position_, float size_scale_);
+	
+	//Model3D destructor (needed a virtual method in order for other classes to inherit properly from this one)
 	virtual ~Model3D();
 
+	ofVec3f position;					/* Position of the model in world coordinates */
+	ofColor color;						/* Color of the model */
+	std::vector<ofVec3f> vertices;		/* Set of verticies defining the shape of the object */
+	std::vector<ofVec2f> edges;			/* Set of integer pairs representing the indices of vertices that are connected by an edge */
 
-	ofVec3f position;					/* position of the model in world coordinates */
-	ofColor color;						/* color of the object */
-	std::vector<ofVec3f> vertices;		/* set of verticies defining the shape of the object */
-	std::vector<ofVec2f> edges;			/* sets of integer pairs representing which vertices are connected by an edge */
-
-	
 	/* Rotates the entire model about a given axis by an angle given by the magnitude of that axis */
 	void rotate(ofVec3f rotation_vector);
 };

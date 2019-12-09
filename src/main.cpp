@@ -1,5 +1,7 @@
+// MAIN - Initializes the Renderer
+
 #include "ofMain.h"
-#include "ofApp.h"
+#include "renderer.h"
 
 const int WIDTH = 1920;
 const int HEIGHT = 1080;

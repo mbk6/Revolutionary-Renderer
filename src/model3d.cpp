@@ -1,18 +1,21 @@
 #include "model3d.h"
 
 Model3D::Model3D() {
-	//Do nothing
+	//Unused default constructor
 }
 
 Model3D::Model3D(std::string obj_path_, ofColor color_, ofVec3f position_, float size_scale_) {
+	//Generate the vertex and edge set from the obj
 	readFromOBJ(obj_path_);
 	color = color_;
 	position = position_;
+
+	//Fix the vertex coordinate system
 	fixVertices(size_scale_);
 }
 
-//Virtual destructor does nothing. I just need Model3D to be polymorphic
 Model3D::~Model3D() {
+	//Virtual destructor does nothing. I just need Model3D to be polymorphic
 }
 
 void Model3D::readFromOBJ(std::string file_path) {
@@ -85,7 +88,7 @@ void Model3D::fixVertices(float size_scale) {
 	//Use the std::accumulate function to compute the "center" of the model by averaging its verticies
 	ofVec3f relative_center = std::accumulate(vertices.begin(), vertices.end(), ofVec3f(0, 0, 0)) / vertices.size();
 
-	//Change the basis of the local coordinate system so that each vertex is relative to the center, then multiply it by the size scale
+	//Change the basis of the local coordinate system so that the center is the new origin of the local coordinate system, then multiply it by the size scale
 	for (ofVec3f &vertex : vertices) {
 		vertex -= relative_center;
 		vertex *= size_scale;

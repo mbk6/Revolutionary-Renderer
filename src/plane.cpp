@@ -1,5 +1,16 @@
 #include "plane.h"
 
+
+Plane::Plane(ofVec3f position_, ofVec3f normal_, ofColor color_, int size_) {
+	position = position_;
+	normal = normal_;
+	color = color_;
+	size = size_;
+	generatePlane(size);
+	fixVertices(1.0f);
+	rotateToNormal(normal);
+}
+
 void Plane::generatePlane(int size) {
 
 	//Generate vertices
@@ -30,9 +41,10 @@ void Plane::generatePlane(int size) {
 }
 
 void Plane::rotateToNormal(ofVec3f normal) {
-
 	normal.normalize();
+	//Find the angle from the current normal (straight up) to the given normal. Rotate by this much
 	float angle = std::acosf(normal.dot(ofVec3f(0, 1, 0)));
+	//Axis of rotation is the cross product of the default normal and the new normal
 	ofVec3f axis = normal.getCrossed(ofVec3f(0, 1, 0)).normalize();
 
 	rotate(axis * angle);

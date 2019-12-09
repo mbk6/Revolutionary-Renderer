@@ -2,7 +2,7 @@
 
 
 Camera::Camera() {
-	//Default constructor
+	//Default constructor does nothing. It's not used by the Renderer program but is required for setting up the camera after initializing it in renderer.cpp
 }
 
 Camera::Camera(ofVec3f position_, ofVec2f rotation_, float max_vertical_angle_, float turn_speed_,
@@ -15,10 +15,11 @@ Camera::Camera(ofVec3f position_, ofVec2f rotation_, float max_vertical_angle_, 
 	move_speed = move_speed_;
 	mouse_sensitivity = mouse_sensitivity_;
 	field_of_view = field_of_view_;
-	//Update the local basis
+
+	//Initialize the local basis
 	computeLocalBasis();
 
-	//Set window parameters
+	//Setup window parameters
 	win_width = win_width_;
 	win_height = win_height_;
 	win_center = ofVec2f(win_width / 2, win_height / 2);
@@ -54,6 +55,7 @@ void Camera::update(ofVec3f move_direction, ofVec3f rotation_change, bool mouse_
 }
 
 void Camera::zoom(float zoom_scale) {
+	//Change the field of view exponentially
 	field_of_view *= std::powf(zoom_speed, zoom_scale);
 }
 
@@ -82,7 +84,7 @@ ofVec2f Camera::transform(ofVec3f point3d) {
 		return ofVec2f(win_center.x - x, win_center.y + y);
 	}
 	else {
-		//Return an out of bounds point so that it is not drawn
+		//Return an out of bounds point to indicate that it should not be drawn
 		return out_of_bounds_point;
 	}
 }
@@ -94,19 +96,18 @@ void Camera::rotateCoords(float& coord0, float& coord1, float angle) {
 	coord1 = coord1 * std::cos(angle) - temp * std::sin(angle);
 }
 
-bool Camera::inBounds(ofVec2f point2d)
-{
+bool Camera::inBounds(ofVec2f point2d) {
 	//Check if the point lies on within the limits of the screen plus the outer margin
 	return (point2d.x >= -1 * win_margin[0] && point2d.x <= win_width + win_margin[0]) && (point2d.y >= -1 * win_margin[1] && point2d.y <= win_height + win_margin[1]);
 }
 
 void Camera::drawModel(Model3D* model) {
 	ofSetColor(model->color);
-	//Draw all "wires"
+	//Draw all edges of the given model
 	ofVec2f point0;
 	ofVec2f point1;
 	for (ofVec2f edge : model->edges) {
-		//Transform the two vertices indicated by the currend edge
+		//Transform the two vertices indicated by the current edge
 		point0 = transform(model->vertices[(int)edge.x] + model->position);
 		point1 = transform(model->vertices[(int)edge.y] + model->position);
 
@@ -118,7 +119,7 @@ void Camera::drawModel(Model3D* model) {
 }
 
 void Camera::computeLocalBasis() {
-	// Equation derived by me!
+	// Equations derived by me :)
 
 	// Use horizontal and vertical rotation to form the unit vector pointing in the direction of the camera
 	local_basis[0] = ofVec3f(std::sin(rotation.x), std::sin(rotation.y), -1 * std::cos(rotation.x)).normalize();
@@ -126,7 +127,7 @@ void Camera::computeLocalBasis() {
 	// Reverse sine and cosine to get the vector pointing exactly to the right of the camera and parallel to the x/z plane
 	local_basis[1] = ofVec3f(std::cos(rotation.x), 0, std::sin(rotation.x));
 
-	// Take the cross product of the two - this will point straight up form the camera
+	// Take the cross product of the two  and normalize it - this will point straight up form the camera
 	local_basis[2] = local_basis[1].getCrossed(local_basis[0]).normalize();
 }
 
