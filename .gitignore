@@ -14,6 +14,8 @@ fantastic-finale-mbk6.vcxproj.user
 
 /bin/*
 !/bin/data/
+!/bin/*.exe
+!/bin/*.dll
 
 # general
 
