@@ -290,6 +290,9 @@ void Renderer::createNewModel() {
 //--------------------------------------------------------------
 void Renderer::setup() {
 
+	//Set window title
+	ofSetWindowTitle("Revolutionary Renderer");
+
 	//Seed random number generator
 	std::srand(static_cast <unsigned> (time(0)));
 	
