@@ -1,5 +1,9 @@
 #include "model3d.h"
 
+Model3D::Model3D() {
+	//Do nothing
+}
+
 Model3D::Model3D(std::string obj_path_, ofColor color_, ofVec3f position_, float size_scale_) {
 	readFromOBJ(obj_path_);
 	color = color_;

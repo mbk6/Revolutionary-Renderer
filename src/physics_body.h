@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model3d.h"
+#include "plane.h"
 
 
 class PhysicsBody : public Model3D {
@@ -32,9 +32,9 @@ public:
 	void update(float time_interval);
 
 	/* Computes the gravitational force between two bodies, and adds it to other.force */
-	void exertGravity(PhysicsBody &other);
+	void exertGravity(PhysicsBody* other);
 
 	/* If the PhysicsBody is close enough to another, it will collide elasticly with it, changing the other's velocity */
-	void collideWith(PhysicsBody& other);
+	void collideWith(Model3D* other);
 
 };

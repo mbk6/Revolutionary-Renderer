@@ -87,20 +87,35 @@ void Renderer::updatePhysics() {
 	//If the frame time is too large, don't update anything
 	if (frame_time <= 1) {
 
-		//Exert gravity between every two PhysicsBodies in the scene
+		
 		if (scene_models.size() > 0) {
+			//Exert gravity and handle collision between every two PhysicsBodies in the scene
 			for (int i = 0; i < scene_models.size() - 1; i++) {
 				if (PhysicsBody* body0 = dynamic_cast<PhysicsBody*>(scene_models[i])) {
 					for (int j = i + 1; j < scene_models.size(); j++) {
 						if (PhysicsBody* body1 = dynamic_cast<PhysicsBody*>(scene_models[j])) {
-							body0->exertGravity(*body1);
-							body0->collideWith(*body1);
+							if (current_demo == PLANETS) {
+								body0->exertGravity(body1);
+							}
+							body0->collideWith(body1);
+						}
+					}
+				}
+			}
+			//Handle collisions with planes
+			for (int i = 0; i < scene_models.size(); i++) {
+				if (PhysicsBody* body0 = dynamic_cast<PhysicsBody*>(scene_models[i])) {
+					for (int j = 0; j < scene_models.size(); j++) {
+						if (Plane* plane = dynamic_cast<Plane*>(scene_models[j])) {
+							body0->collideWith(plane);
 						}
 					}
 				}
 			}
 		}
-		
+
+
+
 
 		//Update and reset all force vectors
 		for (Model3D* model : scene_models) {
@@ -188,6 +203,35 @@ void Renderer::initModelsDemo() {
 
 }
 
+void Renderer::initBoxDemo() {
+	current_demo = BOX;
+	clearScene();
+
+
+	//Add floor, walls and ceiling
+	scene_models.push_back(new Plane(ofVec3f(0, -5, 0), ofVec3f(0, 1, 0), ofColor::white, 11));
+	scene_models.push_back(new Plane(ofVec3f(0, 5, 0), ofVec3f(0, -1, 0), ofColor::white, 11));
+	scene_models.push_back(new Plane(ofVec3f(5, 0, 0), ofVec3f(-1, 0, 0), ofColor::white, 11));
+	scene_models.push_back(new Plane(ofVec3f(-5, 0, 0), ofVec3f(1, 0, 0), ofColor::white, 11));
+	scene_models.push_back(new Plane(ofVec3f(0, 0, 5), ofVec3f(0, 0, -1), ofColor::white, 11));
+	scene_models.push_back(new Plane(ofVec3f(0, 0, -5), ofVec3f(0, 0, 1), ofColor::white, 11));
+
+
+	//Add random balls, no velocities
+
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::green, 1, ofVec3f(-2, 0, 3), ofVec3f(9, 6, 0), ofVec3f(0.5, -0.5, 0.5), 0.1));
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::blue, 1, ofVec3f(3, 2, 0), ofVec3f(2, 6, 0), ofVec3f(0.5, -0.5, 0.5), 0.02));
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::pink, 1, ofVec3f(-3, 0, -4), ofVec3f(-7, 6, 8), ofVec3f(0.5, -0.5, 0.5), 0.4));
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 1, ofVec3f(-2, -1, 0), ofVec3f(3, 6, -3), ofVec3f(0.5, -0.5, 0.5), 0.03));
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::purple, 1, ofVec3f(2, 2, 0), ofVec3f(3, 10, 8), ofVec3f(0.5, -0.5, 0.5), 0.1));
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::orange, 1, ofVec3f(0, 4, 0), ofVec3f(-7, -15, 0), ofVec3f(0.5, -0.5, 0.5), 0.2));
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::purple, 1, ofVec3f(2, 2, 0), ofVec3f(3, 10, 8), ofVec3f(0.5, -0.5, 0.5), 0.1));
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::orange, 1, ofVec3f(0, -1, 0), ofVec3f(-7, -15, 0), ofVec3f(0.5, -0.5, 0.5), 0.2));
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::purple, 1, ofVec3f(2, -2, 0), ofVec3f(3, 10, 8), ofVec3f(0.5, -0.5, 0.5), 0.1));
+	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::orange, 1, ofVec3f(0, 4, -4), ofVec3f(-8, -15, -4), ofVec3f(0.5, -0.5, 0.5), 0.2));
+
+}
+
 void Renderer::createNewPlanet() {
 	if (scene_models.size() < MAX_MODEL_COUNT) {
 		scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", (ofColor)new_planet_color, (float)new_planet_mass, (ofVec3f)new_planet_pos, (ofVec3f)new_planet_vel, ofVec3f(), (float)new_planet_size));
@@ -226,8 +270,8 @@ void Renderer::setup() {
 	face_finder.setPreset(ofxCv::ObjectFinder::Fast);
 	face_finder.getTracker().setSmoothingRate(.2);
 	
-
 	ofSetBackgroundColor(ofColor::black);
+
 
 	//////SETUP GUI\\\\\\\\
 
@@ -241,6 +285,7 @@ void Renderer::setup() {
 	main_panel.add(demos_label.setup("Demos", ""));
 	main_panel.add(planets_demo_button.setup("Planets"));
 	main_panel.add(models_demo_button.setup("Models"));
+	main_panel.add(box_demo_button.setup("Box"));
 
 	//New Planet Panel
 	new_planet_panel.setup();
@@ -252,7 +297,7 @@ void Renderer::setup() {
 	new_planet_panel.add(new_planet_mass.setup("Mass:", 100, 100, 100000));
 	new_planet_panel.add(new_planet_size.setup(0.1));
 	new_planet_panel.add(create_planet_button.setup("Create Planet"));
-	new_planet_panel.add(delete_planets_button.setup("Remove All"));
+	new_planet_panel.add(delete_planets_button.setup("Reset"));
 
 	//New Model Panel
 	new_model_panel.setup();
@@ -267,10 +312,12 @@ void Renderer::setup() {
 	//Button Listeners
 	planets_demo_button.addListener(this, &Renderer::initPlanetsDemo);
 	models_demo_button.addListener(this, &Renderer::initModelsDemo);
+	box_demo_button.addListener(this, &Renderer::initBoxDemo);
 	create_planet_button.addListener(this, &Renderer::createNewPlanet);
 	delete_planets_button.addListener(this, &Renderer::deletePlanets);
 	create_model_button.addListener(this, &Renderer::createNewModel);
 	delete_models_button.addListener(this, &Renderer::clearScene);
+
 
 }
 
@@ -487,7 +534,12 @@ void Renderer::mouseDragged(int x, int y, int button) {
 		ofHideCursor();
 		ofVec2f current_mouse_pos = ofVec2f(x, -y);
 		ofVec2f mouse_difference = current_mouse_pos - last_mouse_pos;
-		edit_mode_model->position += (mouse_difference.x * camera.local_basis[1] + mouse_difference.y * camera.local_basis[2]) * edit_mode_model_dist * edit_translation_speed;
+		ofVec3f position_change = (mouse_difference.x * camera.local_basis[1] + mouse_difference.y * camera.local_basis[2]) * edit_mode_model_dist * edit_translation_speed;
+		edit_mode_model->position += position_change;
+		//If the model is a PhysicsBody, give it the velocity of the mouse
+		if (PhysicsBody* body = dynamic_cast<PhysicsBody*>(edit_mode_model)) {
+			body->velocity = position_change / frame_time;
+		}
 		last_mouse_pos = current_mouse_pos;
 	
 	}
@@ -499,6 +551,10 @@ void Renderer::mouseDragged(int x, int y, int button) {
 		//Use multiples of the rightward and upward local basis vectors to rotate the selected object
 		ofVec3f rotation_vector = (mouse_difference.x * camera.local_basis[2] - mouse_difference.y * camera.local_basis[1]) * edit_rotation_speed;
 		edit_mode_model->rotate(rotation_vector);
+		//If the model is a PhysicsBody, give it the angular velocity of the mouse
+		if (PhysicsBody* body = dynamic_cast<PhysicsBody*>(edit_mode_model)) {
+			body->angular_vel = rotation_vector / frame_time;
+		}
 		last_mouse_pos = current_mouse_pos;
 	}
 }

@@ -6,6 +6,7 @@
 #include "ofxCv.h"
 
 #include "physics_body.h"
+#include "plane.h"
 #include "camera.h"
 
 #include <vector>
@@ -29,6 +30,7 @@ private:
 	ofxLabel demos_label;
 	ofxButton planets_demo_button;
 	ofxButton models_demo_button;
+	ofxButton box_demo_button;
 
 	//New planet panel
 	ofxPanel new_planet_panel;
@@ -50,8 +52,9 @@ private:
 	
 
 	enum DemoMode {
-		NONE, PLANETS, MODELS
+		NONE, PLANETS, MODELS, BOX
 	};
+
 
 
 
@@ -85,7 +88,9 @@ private:
 	ofVec3f gravity = ofVec3f(0, -10, 0);		/* gravity vector (units/sec) */
 
 	//Standard Scene Objects
-	Model3D floor = Model3D("..\\models\\plane_50x50.obj", ofColor::gray, ofVec3f(0, floor_height, 0), 1.0f);
+	//Model3D floor = Model3D("..\\models\\plane_50x50.obj", ofColor::gray, ofVec3f(0, floor_height, 0), 1.0f);
+	Plane floor = Plane(ofVec3f(0, floor_height, 0), ofVec3f(0, 1, 0), ofColor::gray, 50);
+
 
 	// Window parameters
 	int win_width;								/* width of the screen */
@@ -110,7 +115,6 @@ public:
 	//////////////////// RENDERER METHODS \\\\\\\\\\\\\\\\\\\\\
 
 
-
 	/* Updates the camera position and rotation based on user controls */
 	void updateCamera();
 
@@ -127,6 +131,7 @@ public:
 
 	void initPlanetsDemo();
 	void initModelsDemo();
+	void initBoxDemo();
 	void createNewPlanet();
 	void deletePlanets();
 	void createNewModel();

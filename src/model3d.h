@@ -19,6 +19,7 @@ protected:
 	void rotateVector(ofVec3f &vector, ofVec3f rotation_vector);
 
 public:
+	Model3D();
 	Model3D(std::string obj_path_, ofColor color_, ofVec3f position_, float size_scale_);
 	virtual ~Model3D();
 
