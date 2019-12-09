@@ -2,6 +2,7 @@
 
 
 
+
 * 11/15/19 - Generated project, added ofxGui, learned how to draw simple 2D shapes and change colors.
 * 11/16/19 - Began basic perspective rendering by displaying the vertices of a cube. Added camera movement with wsad/space/shift and camera rotation with arrow keys.
 * 11/17/19 - Fixed camera movement to be relative to view angle, added ability to control the camera with the mouse, began using lines to render edges
@@ -16,11 +17,9 @@
 * 12/2/19 - Added OBJ importing using a file dialog,  wrote more tests.
 * 12/3/19 - Added Mirror Mode, using head tracking to move a wireframe head like the user's reflection.
 * 12/7/19 - Removed Mirror Mode and replaced it with head-tracking camera control. Consolidated camera state and behavior into new Camera class.
-* 12/8/19 - Improved efficiency of physical interactions between PhysicsBody objects. PhysicsBody objects can now collide and rebound off of each other realistically (although they are treated as spheres regardless of their shape).
+* 12/8/19 - Improved efficiency of physical interactions between PhysicsBody objects. PhysicsBody objects can now collide and rebound off of each other realistically (although they are treated as spheres regardless of their shape). Added new Box Demo mode, where the user can simulate a box of bouncing balls.
 
 **Upcoming:**
-
-* Handle collision between PhysicsBody objects
 
 * Fix issue of models being drawn on top of each other despite which should be in front
 
