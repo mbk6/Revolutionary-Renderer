@@ -49,6 +49,12 @@ private:
 	ofxFloatSlider new_model_size;
 	ofxButton create_model_button;
 	ofxButton delete_models_button;
+
+	//Box panel
+	ofxPanel box_panel;
+	ofxIntSlider box_size_slider;
+	ofxIntSlider num_balls_slider;
+	ofxButton box_run_button;
 	
 
 	enum DemoMode {
@@ -90,7 +96,6 @@ private:
 	//Standard Scene Objects
 	//Model3D floor = Model3D("..\\models\\plane_50x50.obj", ofColor::gray, ofVec3f(0, floor_height, 0), 1.0f);
 	Plane floor = Plane(ofVec3f(0, floor_height, 0), ofVec3f(0, 1, 0), ofColor::gray, 50);
-
 
 	// Window parameters
 	int win_width;								/* width of the screen */

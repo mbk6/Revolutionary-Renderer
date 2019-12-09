@@ -5,7 +5,7 @@
 
 class PhysicsBody : public Model3D {
 private:
-	const float GRAVITATIONAL_CONSTANT = 0.002; 	// 6.67408e-11;
+	const float GRAVITATIONAL_CONSTANT = 0.002; 	// 6.67408e-11 in real life :P;
 	const float ELASTICITY = 1;
 	float mass;
 

@@ -24,8 +24,11 @@ void PhysicsBody::collideWith(Model3D* other) {
 	//Handle collision with other PhysicsBody
 	if (PhysicsBody* other_body = dynamic_cast<PhysicsBody*>(other)) {
 		ofVec3f displacement = (position - other_body->position);
+		ofVec3f norm_ba = displacement.getNormalized();
+		ofVec3f norm_ab = -norm_ba;
 
-		if (displacement.length() > radius + other_body->radius) {
+		//Don't collide if the two bodies aren't close enough or aren't moving towards each other
+		if (displacement.length() > radius + other_body->radius || (velocity.dot(norm_ab) < 0 && other_body->velocity.dot(norm_ba) < 0)) {
 			return;
 		}
 
@@ -44,6 +47,8 @@ void PhysicsBody::collideWith(Model3D* other) {
 
 		velocity = ELASTICITY * (tan_vel0 * (mass - other_body->mass) / (mass + other_body->mass) + tan_vel1 * (2 * other_body->mass) / (mass + other_body->mass) + perp_vel0);
 		other_body->velocity = ELASTICITY * (tan_vel0 * (2 * mass) / (mass + other_body->mass) + tan_vel1 * (other_body->mass - mass) / (mass + other_body->mass) + perp_vel1);
+
+		ofVec3f center = (mass / other_body->mass) * position + (other_body->mass / mass) * other->position;
 	}
 
 	//Handle Collision with a Plane
@@ -51,11 +56,11 @@ void PhysicsBody::collideWith(Model3D* other) {
 		//Derived by me!
 
 		ofVec3f normal = other_plane->normal.getNormalized();
-		ofVec3f displacement = position - other->position;
+		ofVec3f displacement = position - other_plane->position;
 		float normal_displacement_angle = std::acosf(displacement.dot(normal) / displacement.length());
 
 		
-		float distance_to_plane = (displacement).length() * std::cosf(normal_displacement_angle);
+		float distance_to_plane = displacement.length() * std::cosf(normal_displacement_angle);
 		ofVec3f projected_center = position - distance_to_plane * normal;
 		ofVec3f displacement_from_projection = projected_center - other_plane->position;
 
@@ -76,11 +81,15 @@ void PhysicsBody::collideWith(Model3D* other) {
 		ofVec3f tangental_vel = velocity - normal_vel;
 
 		velocity = -1*normal_vel + tangental_vel;
+
+		position = projected_center + radius * normal;
 	}
 }
 
 float PhysicsBody::average_radius() {
-	float sum;
+	
+	float sum = 0.0f;
+
 	for (ofVec3f vert : vertices) {
 		sum += vert.length();
 	}

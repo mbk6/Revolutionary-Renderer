@@ -198,8 +198,10 @@ void Renderer::initModelsDemo() {
 	//Clear models and add demo models set
 	current_demo = MODELS;
 	clearScene();
-	scene_models.push_back(new Model3D("..\\models\\teapot.obj", ofColor::white, ofVec3f(1, 0, 0), 0.4));
-	scene_models.push_back(new Model3D("..\\models\\cube.obj", ofColor::green, ofVec3f(-1, 0, 0), 1));
+	scene_models.push_back(new Model3D("..\\models\\pumpkin.obj", ofColor::orange, ofVec3f(1, 0, -2), 0.02));
+	scene_models.push_back(new Model3D("..\\models\\cow.obj", ofColor::white, ofVec3f(-1, 0, -2), 0.2));
+	scene_models.push_back(new Model3D("..\\models\\teapot.obj", ofColor::lightBlue, ofVec3f(2, 0, 0), 0.4));
+	scene_models.push_back(new Model3D("..\\models\\cube.obj", ofColor::green, ofVec3f(-2, 0, 0), 1));
 
 }
 
@@ -207,28 +209,58 @@ void Renderer::initBoxDemo() {
 	current_demo = BOX;
 	clearScene();
 
+	int wall_offset = (box_size_slider+1) / 2;
 
 	//Add floor, walls and ceiling
-	scene_models.push_back(new Plane(ofVec3f(0, -5, 0), ofVec3f(0, 1, 0), ofColor::white, 11));
-	scene_models.push_back(new Plane(ofVec3f(0, 5, 0), ofVec3f(0, -1, 0), ofColor::white, 11));
-	scene_models.push_back(new Plane(ofVec3f(5, 0, 0), ofVec3f(-1, 0, 0), ofColor::white, 11));
-	scene_models.push_back(new Plane(ofVec3f(-5, 0, 0), ofVec3f(1, 0, 0), ofColor::white, 11));
-	scene_models.push_back(new Plane(ofVec3f(0, 0, 5), ofVec3f(0, 0, -1), ofColor::white, 11));
-	scene_models.push_back(new Plane(ofVec3f(0, 0, -5), ofVec3f(0, 0, 1), ofColor::white, 11));
+	scene_models.push_back(new Plane(ofVec3f(0, -wall_offset, 0), ofVec3f(0, 1, 0), ofColor::gray, 2*((box_size_slider+1)/2) + 1));
+	scene_models.push_back(new Plane(ofVec3f(0, wall_offset, 0), ofVec3f(0, -1, 0), ofColor::gray, 2*((box_size_slider+1)/2) + 1));
+	scene_models.push_back(new Plane(ofVec3f(wall_offset, 0, 0), ofVec3f(-1, 0, 0), ofColor::gray, 2*((box_size_slider+1)/2) + 1));
+	scene_models.push_back(new Plane(ofVec3f(-wall_offset, 0, 0), ofVec3f(1, 0, 0), ofColor::gray, 2*((box_size_slider+1)/2) + 1));
+	scene_models.push_back(new Plane(ofVec3f(0, 0, wall_offset), ofVec3f(0, 0, -1), ofColor::gray, 2*((box_size_slider+1)/2) + 1));
+	scene_models.push_back(new Plane(ofVec3f(0, 0, -wall_offset), ofVec3f(0, 0, 1), ofColor::gray, 2*((box_size_slider+1)/2) + 1));
 
 
-	//Add random balls, no velocities
+	//Add random balls, no random velocities
+	
+	float pos_bound = 0.4 * box_size_slider;
+	float vel_bound = 1.5*pos_bound;
 
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::green, 1, ofVec3f(-2, 0, 3), ofVec3f(9, 6, 0), ofVec3f(0.5, -0.5, 0.5), 0.1));
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::blue, 1, ofVec3f(3, 2, 0), ofVec3f(2, 6, 0), ofVec3f(0.5, -0.5, 0.5), 0.02));
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::pink, 1, ofVec3f(-3, 0, -4), ofVec3f(-7, 6, 8), ofVec3f(0.5, -0.5, 0.5), 0.4));
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::yellow, 1, ofVec3f(-2, -1, 0), ofVec3f(3, 6, -3), ofVec3f(0.5, -0.5, 0.5), 0.03));
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::purple, 1, ofVec3f(2, 2, 0), ofVec3f(3, 10, 8), ofVec3f(0.5, -0.5, 0.5), 0.1));
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::orange, 1, ofVec3f(0, 4, 0), ofVec3f(-7, -15, 0), ofVec3f(0.5, -0.5, 0.5), 0.2));
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::purple, 1, ofVec3f(2, 2, 0), ofVec3f(3, 10, 8), ofVec3f(0.5, -0.5, 0.5), 0.1));
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::orange, 1, ofVec3f(0, -1, 0), ofVec3f(-7, -15, 0), ofVec3f(0.5, -0.5, 0.5), 0.2));
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::purple, 1, ofVec3f(2, -2, 0), ofVec3f(3, 10, 8), ofVec3f(0.5, -0.5, 0.5), 0.1));
-	scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", ofColor::orange, 1, ofVec3f(0, 4, -4), ofVec3f(-8, -15, -4), ofVec3f(0.5, -0.5, 0.5), 0.2));
+	std::vector<float> random_floats;
+	ofVec3f position;
+	ofVec3f velocity;
+	ofVec3f angular_vel;
+	ofColor color;
+	float mass;
+	float size;
+	for (int i = 0; i < num_balls_slider; i++) {
+
+	//Random float generation method from https://stackoverflow.com/questions/686353/random-float-number-generation
+
+		
+
+		position.x =  -pos_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*pos_bound)));
+		position.y = -pos_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2 * pos_bound)));
+		position.z = -pos_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2 * pos_bound)));
+		
+		velocity.x = -vel_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*vel_bound)));
+		velocity.y = -vel_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*vel_bound)));
+		velocity.z = -vel_bound + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (2*vel_bound)));
+		
+		angular_vel.x = -2 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (4)));
+		angular_vel.y = -2 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (4)));
+		angular_vel.z = -2 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (4)));
+		
+		color.r = 100 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (155)));
+		color.g = 100 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (155)));
+		color.b = 100 + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (155)));
+
+		mass = 1 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (20)));
+
+		//Size of balls depends on size of box
+		float size = (0.05 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.5)))) * box_size_slider / 20;
+
+		scene_models.push_back(new PhysicsBody("..\\models\\sphere.obj", color, mass, position, velocity, angular_vel, size));
+	}
 
 }
 
@@ -260,6 +292,9 @@ void Renderer::createNewModel() {
 ////////////////// OPENFRAMEWORKS METHODS \\\\\\\\\\\\\\\\\\\\\
 //--------------------------------------------------------------
 void Renderer::setup() {
+
+	//Seed random number generator
+	std::srand(static_cast <unsigned> (time(0)));
 		
 	webcam.setup(1024, 576);
 
@@ -283,8 +318,8 @@ void Renderer::setup() {
 	main_panel.add(floor_toggle.setup("Show floor", false));
 	main_panel.add(head_control_toggle.setup("Head Control", false));
 	main_panel.add(demos_label.setup("Demos", ""));
-	main_panel.add(planets_demo_button.setup("Planets"));
 	main_panel.add(models_demo_button.setup("Models"));
+	main_panel.add(planets_demo_button.setup("Planets"));
 	main_panel.add(box_demo_button.setup("Box"));
 
 	//New Planet Panel
@@ -309,6 +344,16 @@ void Renderer::setup() {
 	new_model_panel.add(create_model_button.setup("Create Model"));
 	new_model_panel.add(delete_models_button.setup("Remove All"));
 
+	//Box panel
+	box_panel.setup();
+	box_panel.setName("Box Parameters");
+	box_panel.setPosition(win_width - box_panel.getWidth() - 5, 0);
+	box_panel.add(box_size_slider.setup("Box Size", 20, 5, 40));
+	box_panel.add(num_balls_slider.setup("Number of Balls", 20, 5, 40));
+	box_panel.add(box_run_button.setup("Rerun"));
+
+
+
 	//Button Listeners
 	planets_demo_button.addListener(this, &Renderer::initPlanetsDemo);
 	models_demo_button.addListener(this, &Renderer::initModelsDemo);
@@ -317,6 +362,7 @@ void Renderer::setup() {
 	delete_planets_button.addListener(this, &Renderer::deletePlanets);
 	create_model_button.addListener(this, &Renderer::createNewModel);
 	delete_models_button.addListener(this, &Renderer::clearScene);
+	box_run_button.addListener(this, &Renderer::initBoxDemo);
 
 
 }
@@ -361,6 +407,9 @@ void Renderer::draw() {
 	}
 	else if (current_demo == MODELS) {
 		new_model_panel.draw();
+	}
+	else if (current_demo == BOX) {
+		box_panel.draw();
 	}
 
 	// Draw the OSD - Display frame rate, frame time, camera position/rotation, field of view, and the local basis vectors
@@ -538,7 +587,13 @@ void Renderer::mouseDragged(int x, int y, int button) {
 		edit_mode_model->position += position_change;
 		//If the model is a PhysicsBody, give it the velocity of the mouse
 		if (PhysicsBody* body = dynamic_cast<PhysicsBody*>(edit_mode_model)) {
-			body->velocity = position_change / frame_time;
+			//Only control the body's velocity with the mouse if it's large enough
+			if ((last_mouse_pos - current_mouse_pos).length() > 1) {
+				body->velocity = position_change / frame_time;
+			}
+			else {
+				body->velocity = ofVec3f(0, 0, 0);
+			}
 		}
 		last_mouse_pos = current_mouse_pos;
 	
@@ -568,7 +623,7 @@ void Renderer::mousePressed(int x, int y, int button){
 //--------------------------------------------------------------
 void Renderer::mouseReleased(int x, int y, int button) {
 	
-	//Stay in edit mode if the middle button was just released. Otherwise, show th cursor and exit edit mode
+	//Stay in edit mode if the middle button was just released. Otherwise, show the cursor and exit edit mode
 	if (button != 1) {
 	ofShowCursor();
 
