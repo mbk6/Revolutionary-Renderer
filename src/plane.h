@@ -15,7 +15,7 @@ private:
 
 public:
 
-	int size;			/* Number of vertices along the edge of the plane */
+	int size;		/* Number of vertices along the edge of the plane */
 	ofVec3f normal;		/* Vector normal to the plane */
 
 	//Plane constructor

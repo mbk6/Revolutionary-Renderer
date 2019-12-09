@@ -7,8 +7,8 @@
 class PhysicsBody : public Model3D {
 private:
 	const float GRAVITATIONAL_CONSTANT = 0.002; 	/* How much things gravitate with each other (6.67408e-11 in real life) */
-	const float ELASTICITY = 1;						/* How much speed objects retain after a collision */
-	float mass;										/* The PhysicsBody's mass */
+	const float ELASTICITY = 1;			/* How much speed objects retain after a collision */
+	float mass;					/* The PhysicsBody's mass */
 
 	/* Computes the approximate radius of the body for treating it like a sphere in collisions */
 	float average_radius();
@@ -27,8 +27,8 @@ public:
 	float radius;			/* Approximate radius of the object used for collision detection. Any non-spherical body is still treated like a sphere */
 	ofVec3f force;			/* Current force exerted on this body (not quite newtons but somethihg like that) */
 	ofVec3f velocity;		/* Current velocity of this body (units/sec) */
-	ofVec3f acceleration;	/* Current acceleration of this body (units/sec/sec) */
-	ofVec3f angular_vel;	/* Current angular acceleration of this body (radians/sec) */
+	ofVec3f acceleration;		/* Current acceleration of this body (units/sec/sec) */
+	ofVec3f angular_vel;		/* Current angular acceleration of this body (radians/sec) */
 
 	/* Updates the PhysicsBody's velocity, postion, and rotation over a given time interval */
 	void update(float time_interval);

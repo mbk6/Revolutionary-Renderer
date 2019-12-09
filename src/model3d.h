@@ -18,7 +18,7 @@ protected:
 	void fixVertices(float size_scale);
 
 	/* Rotates a given 3D vector about a given axis by an angle given by the magnitude of that axis */
-	void rotateVector(ofVec3f &vector, ofVec3f rotation_vector);
+	void rotateVector(ofVec3f& vector, ofVec3f rotation_vector);
 
 public:
 
@@ -27,14 +27,14 @@ public:
 
 	//Model3D constructor
 	Model3D(std::string obj_path_, ofColor color_, ofVec3f position_, float size_scale_);
-	
+
 	//Model3D destructor (needed a virtual method in order for other classes to inherit properly from this one)
 	virtual ~Model3D();
 
-	ofVec3f position;					/* Position of the model in world coordinates */
-	ofColor color;						/* Color of the model */
+	ofVec3f position;			/* Position of the model in world coordinates */
+	ofColor color;				/* Color of the model */
 	std::vector<ofVec3f> vertices;		/* Set of verticies defining the shape of the object */
-	std::vector<ofVec2f> edges;			/* Set of integer pairs representing the indices of vertices that are connected by an edge */
+	std::vector<ofVec2f> edges;		/* Set of integer pairs representing the indices of vertices that are connected by an edge */
 
 	/* Rotates the entire model about a given axis by an angle given by the magnitude of that axis */
 	void rotate(ofVec3f rotation_vector);
