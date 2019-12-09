@@ -4,13 +4,12 @@
 
 My final project for CS126 fall 2019 is *Revolutionary Renderer*, a 3D wireframe graphics renderer that can view and manipulate 3D models, as well as run simple physics simulations.
 
-The program includes lots of fun features and focuses most of them into three demonstration modes showing off it's capabilities.
-
 ## Download / Installation
 
 * Download the `bin` and `models` folders from the repo, then run `/bin/fantastic-finale-mbk6.exe`
-
 * Alternatively, use openFrameworks and Visual Studio 2019 to compile the project. The project requires openFrameworks and the addons ofxGui, ofxOpenCv, and ofxCv.
+
+The program includes lots of fun features and focuses most of them into three demonstration modes showing off it's capabilities.
 
 ## Demos
 
