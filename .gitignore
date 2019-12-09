@@ -12,10 +12,12 @@ fantastic-finale-mbk6.vcxproj.user
 # ignore generated binaries
 # but not the data folder
 
-/bin/*
-!/bin/data/
-!/bin/*.exe
-!/bin/*.dll
+/bin/*.exp
+/bin/*.iobj
+/bin/*.ipdb
+/bin/*.lib
+/bin/*.ilk
+/bin/*.pdb
 
 # general
 
