@@ -418,25 +418,14 @@ void Renderer::draw() {
 	// Draw the OSD - Display frame rate, frame time, camera position/rotation, field of view, and the local basis vectors
 	if (osd_toggle) {
 		ofSetColor(ofColor::white);
-		std::stringstream string_stream;
-		string_stream << "fps: " << ofGetFrameRate();
-		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 10));
-		string_stream.str("");
-		string_stream << "frame time (s): " << frame_time;
-		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 20));
-		string_stream.str("");
-		string_stream << "camera.position: (" << camera.position.x << ", " << camera.position.y << ", " << camera.position.z << ")";
-		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 30));
-		string_stream.str("");
-		string_stream << "camera.rotation: (" << camera.rotation.x << ", " << camera.rotation.y << ")";
-		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 40));
-		string_stream.str("");
-		string_stream << "fov: " << camera.field_of_view;
-		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 50));
-		string_stream.str("");
-		string_stream << "camera.local_basis: (" << camera.local_basis[0].x << ", " << camera.local_basis[0].y << ", " << camera.local_basis[0].z << "), (" << camera.local_basis[1].x << ", " << camera.local_basis[1].y << ", " << camera.local_basis[1].z << "), (" << camera.local_basis[2].x << ", " << camera.local_basis[2].y << ", " << camera.local_basis[2].z << ")";
-		ofDrawBitmapString(string_stream.str(), ofVec2f(10, 60));
-		string_stream.str("");
+		ofDrawBitmapString("fps: " + ofToString(ofGetFrameRate()) , ofVec2f(10, 10));
+		ofDrawBitmapString("frame time (s): " + ofToString(frame_time) , ofVec2f(10, 20));
+		ofDrawBitmapString("camera.position: (" + ofToString(camera.position.x) + ", " + ofToString(camera.position.y) + ", " + ofToString(camera.position.z) + ")", ofVec2f(10, 30));
+		ofDrawBitmapString("camera.rotation: (" + ofToString(camera.rotation.x) + ", " + ofToString(camera.rotation.y) + ")" , ofVec2f(10, 40));
+		ofDrawBitmapString("fov: " + ofToString(camera.field_of_view), ofVec2f(10, 50));
+		ofDrawBitmapString("camera.local_basis: (" + ofToString(camera.local_basis[0].x) + ", " + ofToString(camera.local_basis[0].y) + ", " + ofToString(camera.local_basis[0].z)
+			+ "), (" + ofToString(camera.local_basis[1].x) + ", " + ofToString(camera.local_basis[1].y)	+ ", " + ofToString(camera.local_basis[1].z)
+			+ "), (" + ofToString(camera.local_basis[2].x) + ", " + ofToString(camera.local_basis[2].y) + ", " + ofToString(camera.local_basis[2].z) + ")", ofVec2f(10, 60));
 	}
 
 }
