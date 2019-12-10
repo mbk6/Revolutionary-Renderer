@@ -1,3 +1,5 @@
+//This file provides some useful methods for testing
+//NOTE: Methods in the Renderer class are not tested directly, as most of them are graphics-related and their accuracy is observable when running the renderer.
 
 #pragma once
 #include "renderer.h"
