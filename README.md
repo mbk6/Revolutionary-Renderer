@@ -4,17 +4,17 @@
 
 My final project for CS126 fall 2019 is *Revolutionary Renderer*, a 3D wireframe graphics renderer that can view and manipulate 3D models, as well as run simple physics simulations.
 
-## Download / Installation
+## Installation
 
-* Use openFrameworks and Visual Studio 2019 to compile the project. The project requires openFrameworks and the addons ofxGui, ofxOpenCv, and ofxCv.
+* Use the openFrameworks project generator and Visual Studio 2019 to compile the project. The project requires openFrameworks and the addons ofxGui, ofxOpenCv, and ofxCv.
 
 ## Screenshots
 
-![](C:\Users\happy\source\repos\ss1.JPG)
+![](https://imgur.com/ps0aOL0.jpg)
 
-![](C:\Users\happy\source\repos\ss2.JPG)
+![](https://imgur.com/AS9ls71.jpg)
 
-![](C:\Users\happy\source\repos\ss4.JPG)
+![](https://imgur.com/eb58wZH.jpg)
 
 ## Demos
 
