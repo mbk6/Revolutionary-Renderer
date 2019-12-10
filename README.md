@@ -8,9 +8,17 @@ My final project for CS126 fall 2019 is *Revolutionary Renderer*, a 3D wireframe
 
 * Use openFrameworks and Visual Studio 2019 to compile the project. The project requires openFrameworks and the addons ofxGui, ofxOpenCv, and ofxCv.
 
-The program includes lots of fun features and focuses most of them into three demonstration modes showing off it's capabilities.
+## Screenshots
+
+![](C:\Users\happy\source\repos\ss1.JPG)
+
+![](C:\Users\happy\source\repos\ss2.JPG)
+
+![](C:\Users\happy\source\repos\ss4.JPG)
 
 ## Demos
+
+The program includes lots of fun features and focuses most of them into three demonstration modes showing off its capabilities:
 
 * The "Model" demo - an open 3D space in which a user can import and manipulate models in the .OBJ file format. The program comes with nine simple models, found in the `models` folder. Documentation for the source of each one can be found in the first lines of each OBJ file.
 * The "Planets" demo - an sandbox environment for simulating planetary orbits. Includes a graphical interface for creating new planets.
