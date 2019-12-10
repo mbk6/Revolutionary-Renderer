@@ -6,8 +6,7 @@ My final project for CS126 fall 2019 is *Revolutionary Renderer*, a 3D wireframe
 
 ## Download / Installation
 
-* Download the `bin` and `models` folders from the repo, then run `/bin/fantastic-finale-mbk6.exe`
-* Alternatively, use openFrameworks and Visual Studio 2019 to compile the project. The project requires openFrameworks and the addons ofxGui, ofxOpenCv, and ofxCv.
+* Download the latest release, or use openFrameworks and Visual Studio 2019 to compile the project. The project requires openFrameworks and the addons ofxGui, ofxOpenCv, and ofxCv.
 
 The program includes lots of fun features and focuses most of them into three demonstration modes showing off it's capabilities.
 
