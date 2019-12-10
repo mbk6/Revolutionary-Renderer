@@ -37,6 +37,7 @@ The program includes lots of fun features and focuses most of them into three de
 - A moderately-powerful computer. See warning below.
 - Visual Studio 2019
 - openFrameworks
+- openFrameworks addons ofxGui, ofxOpenCv, and ofxCv
 
 ## Warnings
 
