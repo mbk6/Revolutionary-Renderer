@@ -161,11 +161,11 @@ void Renderer::updateHead() {
 		if (face_velocity.length() > 1) {
 			face_velocity *= -1;
 			//Use the local basis to move the camera
-			camera.position += (face_velocity.x * camera.local_basis[1] + face_velocity.y * camera.local_basis[2]) * frame_time * 0.01;
+			camera.position += (face_velocity.x * camera.local_basis[1] + face_velocity.y * camera.local_basis[2])  * 0.0001;
 		}
 		if (std::abs(area_difference) > 1) {
 			//Use the local basis to move the camera
-			camera.position += area_difference * camera.local_basis[0] * frame_time * 0.005;
+			camera.position += area_difference * camera.local_basis[0] * 0.0001;
 		}
 
 		//Update the face rectangle record
