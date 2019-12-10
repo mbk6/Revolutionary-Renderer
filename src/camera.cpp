@@ -27,7 +27,7 @@ Camera::Camera(ofVec3f position_, ofVec2f rotation_, float max_vertical_angle_, 
 	out_of_bounds_point = ofVec2f(-1 * win_margin[0] - 1, -1 * win_margin[1] - 1);
 }
 
-void Camera::update(ofVec3f move_direction, ofVec3f rotation_change, bool mouse_turning, float time_interval) {
+void Camera::update(ofVec3f move_direction, ofVec2f rotation_change, bool mouse_turning, float time_interval) {
 	if (move_direction != ofVec3f()) {
 		//Update the position
 		position += move_direction * move_speed * time_interval;

@@ -35,7 +35,7 @@ public:
 		float move_speed_, float mouse_sensitivity_, float field_of_view_, int win_width_, int win_height_);
 
 	/* Updates the position and rotation of the camera */
-	void update(ofVec3f direction, ofVec3f rotation, bool mouse_turning, float time_interval);
+	void update(ofVec3f move_direction, ofVec2f rotation_change, bool mouse_turning, float time_interval);
 
 	/* Zooms the camera in or out */
 	void zoom(float zoom_scale);
