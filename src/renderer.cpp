@@ -98,7 +98,7 @@ void Renderer::updatePhysics() {
 					for (int j = i + 1; j < scene_models.size(); j++) {
 						if (PhysicsBody* body1 = dynamic_cast<PhysicsBody*>(scene_models[j])) {
 							if (current_demo == PLANETS) {
-								body0->exertGravity(body1);
+								body0->gravitateWith(body1);
 							}
 							body0->collideWith(body1);
 						}

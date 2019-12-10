@@ -1,6 +1,5 @@
 #include "camera.h"
 
-
 Camera::Camera() {
 	//Default constructor does nothing. It's not used by the Renderer program but is required for setting up the camera after initializing it in renderer.cpp
 }
@@ -130,5 +129,3 @@ void Camera::computeLocalBasis() {
 	// Take the cross product of the two  and normalize it - this will point straight up form the camera
 	local_basis[2] = local_basis[1].getCrossed(local_basis[0]).normalize();
 }
-
-

@@ -8,7 +8,7 @@ void PhysicsBody::update(float time_interval) {
 	rotate(angular_vel * time_interval);		/* delta theta = omega * delta t */
 }
 
-void PhysicsBody::exertGravity(PhysicsBody* other) {
+void PhysicsBody::gravitateWith(PhysicsBody* other) {
 
 	// This is just CLASSICAL NEWTONIAN GRAVITATION. I am not wasting my time simulating relativistic effects (although that would be super cool)
 
