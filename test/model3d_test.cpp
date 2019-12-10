@@ -7,7 +7,6 @@ Model3D test_model = Model3D("..\\models\\cube.obj", ofColor::white, ofVec3f(0, 
 TEST_CASE("Test Proper Construction of Model3D") {
 
 	SECTION("Test Proper Instance Variables") {
-		//REQUIRE(test_model.color == ofColor::white);
 		REQUIRE(test_model.position == ofVec3f(0, 0, 0));
 	}
 
