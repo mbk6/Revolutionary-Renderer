@@ -1,7 +1,8 @@
 #include "catch.hpp"
-#include "model3d.h"
+#include "test_utils.h"
 
 Model3D test_model = Model3D("..\\models\\cube.obj", ofColor::white, ofVec3f(0, 0, 0), 2);
+
 
 TEST_CASE("Test Proper Construction of Model3D") {
 
@@ -66,13 +67,16 @@ TEST_CASE("Test Rotation") {
 	SECTION("90 Degree Rotation about X-axis") {
 		test_model.rotate(ofVec3f(PI / 2, 0, 0));
 
-		//REQUIRE(test_model.vertices[0] == ofVec3f(-1, 1, -1));
-		//REQUIRE(test_model.vertices[1] == ofVec3f(-1, -1, -1));
-		//REQUIRE(test_model.vertices[2] == ofVec3f(-1, 1, 1));
-		//REQUIRE(test_model.vertices[3] == ofVec3f(-1, -1, 1));
-		//REQUIRE(test_model.vertices[4] == ofVec3f(1, -1, -1));
-		//REQUIRE(test_model.vertices[5] == ofVec3f(1, -1, -1));
-		//REQUIRE(test_model.vertices[6] == ofVec3f(1, 1, 1));
-		//REQUIRE(test_model.vertices[7] == ofVec3f(1, -1, 1));
+		REQUIRE(nearlyEquivalent(test_model.vertices[0], ofVec3f(-1, 1, -1)));
+		REQUIRE(nearlyEquivalent(test_model.vertices[1], ofVec3f(-1, -1, -1)));
+		REQUIRE(nearlyEquivalent(test_model.vertices[2], ofVec3f(-1, 1, 1)));
+		REQUIRE(nearlyEquivalent(test_model.vertices[3], ofVec3f(-1, -1, 1)));
+		REQUIRE(nearlyEquivalent(test_model.vertices[4], ofVec3f(1, 1, -1)));
+		REQUIRE(nearlyEquivalent(test_model.vertices[5], ofVec3f(1, -1, -1)));
+		REQUIRE(nearlyEquivalent(test_model.vertices[6], ofVec3f(1, 1, 1)));
+		REQUIRE(nearlyEquivalent(test_model.vertices[7], ofVec3f(1, -1, 1)));
 	}
 }
+
+//Methods readFromOBJ, addEdge, fixVertices, and rotateVector cannot be tested
+//directly and are tested thorugh the "Proper Construction" test case
