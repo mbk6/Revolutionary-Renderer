@@ -2,7 +2,7 @@
 
 <h2>Project Proposal</h2>
 
-For my final project for this class, I intend to write a 3D wireframe graphics renderer in openFrameworks. I plan on implementing real time 3D rendering to the application window, a controllable camera to move around the 3D space, and the ability to load in and view OBJ files, a standard filetype for simple 3D models. In addition to this, I intend to run one or more simple physics simulations of some kind in this 3D space, such as a pendulum, planetary orbits, or a bouncing ball.  One of the extra features of my project will be head-controlled camera movement, where I will use face tracking provided by the addon ofxCv to allow the user to control the camera with their head movement. 
+For my final project for CS 126, I intend to write a 3D wireframe graphics renderer in openFrameworks. I plan on implementing real time 3D rendering to the application window, a controllable camera to move around the 3D space, and the ability to load in and view OBJ files, a standard filetype for simple 3D models. In addition to this, I intend to run one or more simple physics simulations of some kind in this 3D space, such as a pendulum, planetary orbits, or a bouncing ball.  One of the extra features of my project will be head-controlled camera movement, where I will use face tracking provided by the addon ofxCv to allow the user to control the camera with their head movement. 
 
 I am aware that OpenFrameworks also comes with functions that could do some 3D rendering for me, *but I do not intend to use them*. **I mean for all 3D effects to be computed manually, using nothing but my own code and OpenFrameworks' 2D drawing tools**.
 
