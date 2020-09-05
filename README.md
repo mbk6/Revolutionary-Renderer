@@ -2,7 +2,7 @@
 
 ## Overview
 
-My final project for CS126 fall 2019 is *Revolutionary Renderer*, a 3D wireframe graphics renderer that can view and manipulate 3D models, as well as run simple physics simulations.
+*Revolutionary Renderer* is a 3D wireframe graphics renderer that can view and manipulate 3D models, as well as run simple physics simulations.
 
 ## Installation
 
